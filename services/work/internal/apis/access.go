@@ -68,6 +68,18 @@ func ensureAssignee(ctx context.Context, d *Deps, spaceID, assigneeID string) er
 	return nil
 }
 
+func applyIssueExtras(ctx context.Context, d *Deps, spaceID, issueID, priority, dueAt, parentID string, extra []string) error {
+	if err := d.Store.SetIssueFields(ctx, issueID, priority, dueAt, parentID); err != nil {
+		return err
+	}
+	for _, uid := range extra {
+		if err := ensureAssignee(ctx, d, spaceID, uid); err != nil {
+			return err
+		}
+	}
+	return d.Store.ReplaceAssignees(ctx, issueID, extra)
+}
+
 func publishIssue(d *Deps, subject, typ string, iss *models.Issue) {
 	if d.NC == nil || iss == nil {
 		return
