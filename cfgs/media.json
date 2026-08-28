@@ -3,6 +3,11 @@
   "description": "Blob store (upload/download via gate catalog)",
   "order": 90,
   "env": {
-    "MEDIA_MAX_BYTES": "1048576"
+    "MEDIA_MAX_BYTES": "1048576",
+    "MEDIA_SIGN_TTL": "15m",
+    "MEDIA_S3_BUCKET": "",
+    "MEDIA_S3_ENDPOINT": "",
+    "MEDIA_S3_REGION": "us-east-1",
+    "MEDIA_S3_PATH_STYLE": "true"
   }
 }
