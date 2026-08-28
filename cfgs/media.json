@@ -1,0 +1,8 @@
+{
+  "name": "media",
+  "description": "Blob store (upload/download via gate catalog)",
+  "order": 90,
+  "env": {
+    "MEDIA_MAX_BYTES": "1048576"
+  }
+}
