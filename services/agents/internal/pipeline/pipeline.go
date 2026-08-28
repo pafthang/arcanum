@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/pafthang/arcanum/services/agents/internal/providers"
 	"github.com/pafthang/arcanum/services/agents/internal/store"
+	"github.com/pafthang/arcanum/services/agents/internal/tools"
 	"github.com/pafthang/arcanum/services/agents/models"
 )
 
@@ -45,9 +47,12 @@ type State struct {
 	Output   string
 }
 
-// Runner executes stages against the agents store. LLM providers live in integ later.
+// Runner executes stages against the agents store.
 type Runner struct {
-	Store *store.Store
+	Store    *store.Store
+	Provider providers.Provider
+	Tools    *tools.Host
+	MaxSteps int
 }
 
 // Execute runs the pipeline for an existing queued/running run.
@@ -123,11 +128,11 @@ func (r *Runner) step(ctx context.Context, name string, st *State) error {
 		}
 		st.Notes[name] = fmt.Sprintf("skills=%s input=%d", strings.Join(names, ","), len(st.Run.Input))
 	case StageThink:
-		st.Notes[name] = "local"
-	case StageAct:
-		st.Notes[name] = "noop"
-	case StageObserve:
-		st.Notes[name] = st.Run.Input
+		return r.thinkAct(ctx, st)
+	case StageAct, StageObserve:
+		if st.Notes[StageThink] == "" {
+			return r.thinkAct(ctx, st)
+		}
 	case StageMemory:
 		if strings.TrimSpace(st.Run.Input) != "" {
 			_, err := r.Store.PutMemory(ctx, st.Run.SpaceID, st.Run.AgentID, models.TierWorking, "last_input", st.Run.Input)
@@ -137,7 +142,9 @@ func (r *Runner) step(ctx context.Context, name string, st *State) error {
 		}
 		st.Notes[name] = models.TierWorking
 	case StageSummarize:
-		st.Output = summarize(st)
+		if strings.TrimSpace(st.Output) == "" {
+			st.Output = summarize(st)
+		}
 		st.Notes[name] = st.Output
 	default:
 		return fmt.Errorf("unknown stage %s", name)
