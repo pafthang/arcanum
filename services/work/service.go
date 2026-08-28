@@ -6,6 +6,7 @@ import (
 
 	"github.com/pafthang/arcanum/pkg/lifecycle"
 	"github.com/pafthang/arcanum/pkg/svcutil"
+	loggclient "github.com/pafthang/arcanum/services/logg/client"
 	spaceclient "github.com/pafthang/arcanum/services/space/client"
 	"github.com/pafthang/arcanum/services/work/internal/apis"
 	"github.com/pafthang/arcanum/services/work/internal/config"
@@ -24,11 +25,17 @@ func Run() {
 	defer func() { _ = dbStore.Close() }()
 
 	var sc *spaceclient.Client
+	var lc *loggclient.Client
 	if app.NC != nil {
 		if c, err := spaceclient.New(app.NC); err != nil {
 			slog.Warn("space client unavailable", "err", err)
 		} else {
 			sc = c
+		}
+		if c, err := loggclient.New(app.NC); err != nil {
+			slog.Warn("logg client unavailable", "err", err)
+		} else {
+			lc = c
 		}
 	}
 
@@ -36,6 +43,7 @@ func Run() {
 		Store:  dbStore,
 		NC:     app.NC,
 		Space:  sc,
+		Logg:   lc,
 		Config: cfg,
 	}
 

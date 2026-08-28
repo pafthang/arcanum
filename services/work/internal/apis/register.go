@@ -3,6 +3,7 @@ package apis
 import (
 	"github.com/nats-io/nats.go"
 	"github.com/pafthang/arcanum/pkg/mini"
+	loggclient "github.com/pafthang/arcanum/services/logg/client"
 	spaceclient "github.com/pafthang/arcanum/services/space/client"
 	"github.com/pafthang/arcanum/services/work/internal/config"
 	"github.com/pafthang/arcanum/services/work/internal/store"
@@ -13,6 +14,7 @@ type Deps struct {
 	Store  *store.Store
 	NC     *nats.Conn
 	Space  *spaceclient.Client
+	Logg   *loggclient.Client
 	Config config.Config
 }
 
