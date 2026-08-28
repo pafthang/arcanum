@@ -7,6 +7,7 @@ import (
 	"github.com/pafthang/arcanum/pkg/lifecycle"
 	"github.com/pafthang/arcanum/pkg/svcutil"
 	loggclient "github.com/pafthang/arcanum/services/logg/client"
+	mediaclient "github.com/pafthang/arcanum/services/media/client"
 	spaceclient "github.com/pafthang/arcanum/services/space/client"
 	"github.com/pafthang/arcanum/services/work/internal/apis"
 	"github.com/pafthang/arcanum/services/work/internal/config"
@@ -26,6 +27,7 @@ func Run() {
 
 	var sc *spaceclient.Client
 	var lc *loggclient.Client
+	var mc *mediaclient.Client
 	if app.NC != nil {
 		if c, err := spaceclient.New(app.NC); err != nil {
 			slog.Warn("space client unavailable", "err", err)
@@ -37,6 +39,11 @@ func Run() {
 		} else {
 			lc = c
 		}
+		if c, err := mediaclient.New(app.NC); err != nil {
+			slog.Warn("media client unavailable", "err", err)
+		} else {
+			mc = c
+		}
 	}
 
 	deps := &apis.Deps{
@@ -44,6 +51,7 @@ func Run() {
 		NC:     app.NC,
 		Space:  sc,
 		Logg:   lc,
+		Media:  mc,
 		Config: cfg,
 	}
 

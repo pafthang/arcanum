@@ -6,6 +6,7 @@ import (
 	"github.com/pafthang/arcanum/pkg/subjects"
 	"github.com/pafthang/arcanum/services/comms/internal/config"
 	"github.com/pafthang/arcanum/services/comms/internal/store"
+	mediaclient "github.com/pafthang/arcanum/services/media/client"
 	spaceclient "github.com/pafthang/arcanum/services/space/client"
 )
 
@@ -14,6 +15,7 @@ type Deps struct {
 	Store  *store.Store
 	NC     *nats.Conn
 	Space  *spaceclient.Client
+	Media  *mediaclient.Client
 	Config config.Config
 }
 
