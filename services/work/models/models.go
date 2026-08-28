@@ -49,6 +49,7 @@ type Comment struct {
 	IssueID   string `json:"issueId"`
 	ActorID   string `json:"actorId"`
 	Body      string `json:"body"`
+	BlobID    string `json:"blobId,omitempty"`
 	CreatedAt string `json:"createdAt"`
 }
 
@@ -92,7 +93,8 @@ type CreateLabelRequest struct {
 
 // CreateCommentRequest is POST .../issues/{issueId}/comments body.
 type CreateCommentRequest struct {
-	Body string `json:"body"`
+	Body   string `json:"body"`
+	BlobID string `json:"blobId"`
 }
 
 // Overview is a space-scoped read model over issues (not a separate service).
