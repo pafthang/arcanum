@@ -4,6 +4,7 @@ import (
 	"github.com/nats-io/nats.go"
 	"github.com/pafthang/arcanum/pkg/mini"
 	"github.com/pafthang/arcanum/services/runtime/internal/config"
+	"github.com/pafthang/arcanum/services/runtime/internal/docker"
 	"github.com/pafthang/arcanum/services/runtime/internal/store"
 	spaceclient "github.com/pafthang/arcanum/services/space/client"
 )
@@ -14,6 +15,7 @@ type Deps struct {
 	NC     *nats.Conn
 	Space  *spaceclient.Client
 	Config config.Config
+	Docker docker.Engine
 }
 
 // Register attaches public HTTP endpoints.

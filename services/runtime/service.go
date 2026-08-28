@@ -8,6 +8,7 @@ import (
 	"github.com/pafthang/arcanum/pkg/svcutil"
 	"github.com/pafthang/arcanum/services/runtime/internal/apis"
 	"github.com/pafthang/arcanum/services/runtime/internal/config"
+	"github.com/pafthang/arcanum/services/runtime/internal/docker"
 	"github.com/pafthang/arcanum/services/runtime/internal/store"
 	spaceclient "github.com/pafthang/arcanum/services/space/client"
 )
@@ -32,7 +33,15 @@ func Run() {
 		}
 	}
 
-	deps := &apis.Deps{Store: dbStore, NC: app.NC, Space: sc, Config: cfg}
+	deps := &apis.Deps{
+		Store:  dbStore,
+		NC:     app.NC,
+		Space:  sc,
+		Config: cfg,
+	}
+	if eng := docker.New(cfg.DockerHost); eng != nil {
+		deps.Docker = eng
+	}
 
 	app.WireLifecycle(lifecycle.ReloaderFunc(func() error {
 		_ = dbStore.Close()
@@ -43,6 +52,10 @@ func Run() {
 		dbStore = s
 		deps.Store = s
 		deps.Config = config.FromEnv()
+		deps.Docker = nil
+		if eng := docker.New(deps.Config.DockerHost); eng != nil {
+			deps.Docker = eng
+		}
 		return nil
 	}))
 
