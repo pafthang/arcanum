@@ -91,3 +91,15 @@ func (c *Client) GetUserByEmail(ctx context.Context, email string) (*models.User
 	}
 	return &out, nil
 }
+
+// Can reports whether userId may perform perm in spaceId.
+func (c *Client) Can(ctx context.Context, userID, spaceID, perm string) (models.CanResponse, error) {
+	var out models.CanResponse
+	if c == nil || c.c == nil {
+		return out, mini.ErrInvalidConnection
+	}
+	err := c.c.RequestJSON(ctx, subjects.InternalSpaceCan, models.CanRequest{
+		UserID: userID, SpaceID: spaceID, Perm: perm,
+	}, &out, nil)
+	return out, err
+}
