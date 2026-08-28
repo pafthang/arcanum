@@ -31,6 +31,24 @@ func registerAuth(svc mini.Service, d *Deps) {
 		mini.WithPublicAuth(mini.AuthNone),
 	))
 
+	must(svc.AddEndpoint("auth_api_key", mini.HandlerFunc(func(req mini.Request) {
+		var in models.APIKeyAuthRequest
+		if err := httpx.BindJSON(req, &in); err != nil {
+			httpx.Error(req, 400, "Invalid body.", nil)
+			return
+		}
+		out, code, err := loginAPIKey(req.Context(), d, in.Secret)
+		if err != nil {
+			httpx.Error(req, code, err.Error(), nil)
+			return
+		}
+		httpx.JSON(req, 200, out)
+	}),
+		mini.WithPublicHTTP("POST", "/api/auth/api-key"),
+		mini.WithPublicSubject("space", "auth.api_key"),
+		mini.WithPublicAuth(mini.AuthNone),
+	))
+
 	must(svc.AddEndpoint("auth_switch_space", mini.HandlerFunc(func(req mini.Request) {
 		tc := httpx.SpaceContext(req)
 		if tc.UserID == "" {
@@ -95,6 +113,62 @@ func registerUser(ctx context.Context, d *Deps, in models.RegisterRequest) (*mod
 		Space:     sp,
 		SpaceRole: store.RoleOwner,
 	}, 201, nil
+}
+
+func loginAPIKey(ctx context.Context, d *Deps, secret string) (*models.LoginResponse, int, error) {
+	secret = strings.TrimSpace(secret)
+	if secret == "" {
+		return nil, 400, errMsg("secret required")
+	}
+	key, err := d.Store.GetAPIKeyByHash(ctx, passwd.KeyHash(secret))
+	if err != nil {
+		return nil, 500, err
+	}
+	if key == nil {
+		return nil, 401, errMsg("invalid api key")
+	}
+	u, err := d.Store.GetUser(ctx, key.UserID)
+	if err != nil {
+		return nil, 500, err
+	}
+	if u == nil {
+		return nil, 401, errMsg("invalid api key")
+	}
+	return tokenForUser(ctx, d, u)
+}
+
+func tokenForUser(ctx context.Context, d *Deps, u *store.UserRecord) (*models.LoginResponse, int, error) {
+	spaces, err := d.Store.ListSpacesForUser(ctx, u.ID)
+	if err != nil {
+		return nil, 500, err
+	}
+	var (
+		spaceID, spaceRole string
+		sp                 *models.Space
+	)
+	if len(spaces) > 0 {
+		chosen := spaces[0]
+		for _, item := range spaces {
+			if item.ID == store.DefaultSpaceID {
+				chosen = item
+				break
+			}
+		}
+		spaceID = chosen.ID
+		spaceRole = chosen.Role
+		copy := chosen.Space
+		sp = &copy
+	}
+	tok, err := token.Issue([]byte(d.Config.JWTSecret), d.Config.JWTTTL, u.ID, u.Email, u.Actor, u.PlatformAdmin, spaceID, spaceRole)
+	if err != nil {
+		return nil, 500, err
+	}
+	return &models.LoginResponse{
+		Token:     tok,
+		User:      u.User,
+		Space:     sp,
+		SpaceRole: spaceRole,
+	}, 200, nil
 }
 
 func switchSpace(ctx context.Context, d *Deps, userID, spaceID string) (*models.LoginResponse, int, error) {
