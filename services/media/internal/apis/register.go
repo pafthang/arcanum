@@ -23,6 +23,7 @@ func Register(svc mini.Service, d *Deps) {
 	}
 	registerPublic(svc, d)
 	registerDelete(svc, d)
+	registerURL(svc, d)
 	registerInternal(d)
 }
 

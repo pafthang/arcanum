@@ -18,3 +18,10 @@ type JSONUpload struct {
 	ContentType string `json:"contentType"`
 	Data        []byte `json:"data"`
 }
+
+// SignedURL is a time-limited download location.
+type SignedURL struct {
+	URL       string `json:"url"`
+	ExpiresAt string `json:"expiresAt"`
+	Backend   string `json:"backend"`
+}

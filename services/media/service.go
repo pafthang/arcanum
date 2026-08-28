@@ -17,7 +17,7 @@ func Run() {
 	app, cfg := svcutil.BootstrapWithConfig("media", Version, "Blob store", config.FromEnv)
 	defer app.Shutdown()
 
-	dbStore, err := store.OpenStore(app.DataDir)
+	dbStore, err := store.OpenStoreBackend(app.DataDir, cfg.Backend(app.DataDir))
 	if err != nil {
 		log.Fatalf("open store: %v", err)
 	}
@@ -41,7 +41,7 @@ func Run() {
 
 	app.WireLifecycle(lifecycle.ReloaderFunc(func() error {
 		_ = dbStore.Close()
-		s, err := store.OpenStore(app.DataDir)
+		s, err := store.OpenStoreBackend(app.DataDir, config.FromEnv().Backend(app.DataDir))
 		if err != nil {
 			return err
 		}
@@ -57,6 +57,7 @@ func Run() {
 		"data", app.DataDir,
 		"version", app.Version,
 		"maxBytes", cfg.MaxBytes,
+		"s3", cfg.S3Bucket != "",
 	)
 	app.Wait()
 }
