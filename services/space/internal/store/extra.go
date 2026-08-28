@@ -156,6 +156,52 @@ ORDER BY k.created_at ASC`, strings.TrimSpace(spaceID))
 	return out, rows.Err()
 }
 
+// RemoveMember deletes a membership. Last owner cannot be removed.
+func (s *Store) RemoveMember(ctx context.Context, spaceID, userID string) error {
+	cur, err := s.GetMember(ctx, spaceID, userID)
+	if err != nil {
+		return err
+	}
+	if cur == nil {
+		return fmt.Errorf("member not found")
+	}
+	if cur.Role == RoleOwner {
+		n, err := s.countOwners(ctx, spaceID)
+		if err != nil {
+			return err
+		}
+		if n <= 1 {
+			return fmt.Errorf("cannot remove the last owner")
+		}
+	}
+	_, err = s.db.ExecContext(ctx, `
+DELETE FROM space_members WHERE space_id = ? AND user_id = ?`,
+		strings.TrimSpace(spaceID), strings.TrimSpace(userID))
+	return err
+}
+
+// UpdateTeam renames a team in a space.
+func (s *Store) UpdateTeam(ctx context.Context, spaceID, teamID, name string) (*models.Team, error) {
+	name = strings.TrimSpace(name)
+	if name == "" {
+		return nil, fmt.Errorf("name required")
+	}
+	t, err := s.GetTeam(ctx, spaceID, teamID)
+	if err != nil {
+		return nil, err
+	}
+	if t == nil {
+		return nil, nil
+	}
+	_, err = s.db.ExecContext(ctx, `UPDATE teams SET name = ? WHERE id = ? AND space_id = ?`,
+		name, strings.TrimSpace(teamID), strings.TrimSpace(spaceID))
+	if err != nil {
+		return nil, err
+	}
+	t.Name = name
+	return t, nil
+}
+
 // GetAPIKeyByHash looks up a key by stored hash.
 func (s *Store) GetAPIKeyByHash(ctx context.Context, keyHash string) (*models.APIKey, error) {
 	var k models.APIKey
