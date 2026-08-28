@@ -35,6 +35,10 @@ func OpenStore(dataDir string) (*Store, error) {
 		_ = db.Close()
 		return nil, err
 	}
+	if err := migrateCommentBlob(db); err != nil {
+		_ = db.Close()
+		return nil, err
+	}
 	return &Store{db: db}, nil
 }
 
@@ -224,12 +228,13 @@ UPDATE issues SET title=?, body=?, status=?, assignee_id=?, updated_at=? WHERE i
 }
 
 // AddComment appends a comment to an issue.
-func (s *Store) AddComment(ctx context.Context, issueID, actorID, body string) (*models.Comment, error) {
+func (s *Store) AddComment(ctx context.Context, issueID, actorID, body, blobID string) (*models.Comment, error) {
 	issueID = strings.TrimSpace(issueID)
 	actorID = strings.TrimSpace(actorID)
 	body = strings.TrimSpace(body)
-	if issueID == "" || actorID == "" || body == "" {
-		return nil, fmt.Errorf("issue_id, actor_id and body required")
+	blobID = strings.TrimSpace(blobID)
+	if issueID == "" || actorID == "" || (body == "" && blobID == "") {
+		return nil, fmt.Errorf("issue_id, actor_id and body or blob_id required")
 	}
 	iss, err := s.GetIssue(ctx, issueID)
 	if err != nil {
@@ -243,11 +248,12 @@ func (s *Store) AddComment(ctx context.Context, issueID, actorID, body string) (
 		IssueID:   issueID,
 		ActorID:   actorID,
 		Body:      body,
+		BlobID:    blobID,
 		CreatedAt: nowRFC3339(),
 	}
 	_, err = s.db.ExecContext(ctx, `
-INSERT INTO issue_comments (id, issue_id, actor_id, body, created_at) VALUES (?,?,?,?,?)`,
-		c.ID, c.IssueID, c.ActorID, c.Body, c.CreatedAt)
+INSERT INTO issue_comments (id, issue_id, actor_id, body, blob_id, created_at) VALUES (?,?,?,?,?,?)`,
+		c.ID, c.IssueID, c.ActorID, c.Body, c.BlobID, c.CreatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -257,7 +263,7 @@ INSERT INTO issue_comments (id, issue_id, actor_id, body, created_at) VALUES (?,
 // ListComments returns comments for an issue, oldest first.
 func (s *Store) ListComments(ctx context.Context, issueID string) ([]models.Comment, error) {
 	rows, err := s.db.QueryContext(ctx, `
-SELECT id, issue_id, actor_id, body, created_at
+SELECT id, issue_id, actor_id, body, blob_id, created_at
 FROM issue_comments WHERE issue_id = ?
 ORDER BY created_at ASC`, strings.TrimSpace(issueID))
 	if err != nil {
@@ -267,7 +273,7 @@ ORDER BY created_at ASC`, strings.TrimSpace(issueID))
 	out := []models.Comment{}
 	for rows.Next() {
 		var c models.Comment
-		if err := rows.Scan(&c.ID, &c.IssueID, &c.ActorID, &c.Body, &c.CreatedAt); err != nil {
+		if err := rows.Scan(&c.ID, &c.IssueID, &c.ActorID, &c.Body, &c.BlobID, &c.CreatedAt); err != nil {
 			return nil, err
 		}
 		out = append(out, c)
