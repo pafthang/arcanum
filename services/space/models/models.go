@@ -85,6 +85,11 @@ type SwitchSpaceRequest struct {
 	SpaceID string `json:"spaceId"`
 }
 
+// APIKeyAuthRequest is POST /api/auth/api-key body.
+type APIKeyAuthRequest struct {
+	Secret string `json:"secret"`
+}
+
 // InviteMemberRequest is POST /api/spaces/{spaceId}/members body.
 type InviteMemberRequest struct {
 	Email string `json:"email"`
