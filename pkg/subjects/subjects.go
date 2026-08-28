@@ -85,6 +85,12 @@ const (
 	PublicIntegDeliveryList    = "public.integ.delivery.list"
 	PublicIntegHookIngest      = "public.integ.hook.ingest"
 	PublicIntegHookGitHub      = "public.integ.hook.github"
+
+	// media
+	PublicMediaBlobList    = "public.media.blob.list"
+	PublicMediaBlobCreate  = "public.media.blob.create"
+	PublicMediaBlobGet     = "public.media.blob.get"
+	PublicMediaBlobContent = "public.media.blob.content"
 )
 
 // Internal RPC.
@@ -114,6 +120,10 @@ const (
 	InternalCommsChannelList   = "internal.comms.channel.list"
 	InternalCommsMessageCreate = "internal.comms.message.create"
 	InternalCommsInbound       = "internal.comms.inbound"
+
+	// media
+	InternalMediaGet      = "internal.media.get"
+	InternalMediaGetBytes = "internal.media.get_bytes"
 )
 
 // Events (publish).
