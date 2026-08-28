@@ -72,3 +72,63 @@ type LoginResponse struct {
 type CreateSpaceRequest struct {
 	Name string `json:"name"`
 }
+
+// RegisterRequest is POST /api/auth/register body.
+type RegisterRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Name     string `json:"name"`
+}
+
+// SwitchSpaceRequest is POST /api/auth/switch-space body.
+type SwitchSpaceRequest struct {
+	SpaceID string `json:"spaceId"`
+}
+
+// InviteMemberRequest is POST /api/spaces/{spaceId}/members body.
+type InviteMemberRequest struct {
+	Email string `json:"email"`
+	Role  string `json:"role"`
+}
+
+// UpdateMemberRequest is PATCH /api/spaces/{spaceId}/members/{userId} body.
+type UpdateMemberRequest struct {
+	Role string `json:"role"`
+}
+
+// CreateTeamRequest is POST /api/spaces/{spaceId}/teams body.
+type CreateTeamRequest struct {
+	Name     string `json:"name"`
+	ParentID string `json:"parentId"`
+}
+
+// AddTeamMemberRequest is POST .../teams/{teamId}/members body.
+type AddTeamMemberRequest struct {
+	UserID string `json:"userId"`
+	Role   string `json:"role"`
+}
+
+// CreateAPIKeyRequest is POST /api/spaces/{spaceId}/keys body.
+type CreateAPIKeyRequest struct {
+	Email string `json:"email"`
+}
+
+// CreateAPIKeyResponse returns the secret once.
+type CreateAPIKeyResponse struct {
+	APIKey
+	User   User   `json:"user"`
+	Secret string `json:"secret"`
+}
+
+// CanRequest is internal.space.can payload.
+type CanRequest struct {
+	UserID  string `json:"userId"`
+	SpaceID string `json:"spaceId"`
+	Perm    string `json:"perm"`
+}
+
+// CanResponse is internal.space.can result.
+type CanResponse struct {
+	OK   bool   `json:"ok"`
+	Role string `json:"role,omitempty"`
+}
