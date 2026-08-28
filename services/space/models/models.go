@@ -102,6 +102,11 @@ type CreateTeamRequest struct {
 	ParentID string `json:"parentId"`
 }
 
+// UpdateTeamRequest is PATCH .../teams/{teamId} body.
+type UpdateTeamRequest struct {
+	Name string `json:"name"`
+}
+
 // AddTeamMemberRequest is POST .../teams/{teamId}/members body.
 type AddTeamMemberRequest struct {
 	UserID string `json:"userId"`
