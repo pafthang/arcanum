@@ -19,6 +19,14 @@ const apiPrefix = "/v1.43"
 type Engine interface {
 	Start(ctx context.Context, name, image string) (string, error)
 	Stop(ctx context.Context, containerID string) error
+	Exec(ctx context.Context, containerID string, cmd []string) (*ExecResult, error)
+}
+
+// ExecResult is the output of a container exec.
+type ExecResult struct {
+	Stdout   string `json:"stdout"`
+	Stderr   string `json:"stderr"`
+	ExitCode int    `json:"exitCode"`
 }
 
 // Client talks HTTP to a Docker host (unix socket or TCP).
@@ -137,6 +145,93 @@ func (c *Client) Stop(ctx context.Context, containerID string) error {
 		return fmt.Errorf("docker stop %d: %s", res.StatusCode, truncate(b))
 	}
 	return nil
+}
+
+const maxExecBytes = 64 << 10
+
+// Exec runs cmd in a running container and captures stdout/stderr.
+func (c *Client) Exec(ctx context.Context, containerID string, cmd []string) (*ExecResult, error) {
+	if c == nil {
+		return nil, fmt.Errorf("docker not configured")
+	}
+	containerID = strings.TrimSpace(containerID)
+	if containerID == "" {
+		return nil, fmt.Errorf("container id required")
+	}
+	if len(cmd) == 0 {
+		return nil, fmt.Errorf("cmd required")
+	}
+	body, _ := json.Marshal(map[string]any{
+		"AttachStdout": true,
+		"AttachStderr": true,
+		"Cmd":          cmd,
+	})
+	res, err := c.do(ctx, http.MethodPost, apiPrefix+"/containers/"+url.PathEscape(containerID)+"/exec", "application/json", bytes.NewReader(body))
+	if err != nil {
+		return nil, err
+	}
+	raw, _ := io.ReadAll(res.Body)
+	res.Body.Close()
+	if res.StatusCode >= 300 {
+		return nil, fmt.Errorf("docker exec create %d: %s", res.StatusCode, truncate(raw))
+	}
+	var created struct {
+		ID string `json:"Id"`
+	}
+	if err := json.Unmarshal(raw, &created); err != nil || created.ID == "" {
+		return nil, fmt.Errorf("docker exec create: bad id")
+	}
+	startBody, _ := json.Marshal(map[string]any{"Detach": false, "Tty": false})
+	startRes, err := c.do(ctx, http.MethodPost, apiPrefix+"/exec/"+url.PathEscape(created.ID)+"/start", "application/json", bytes.NewReader(startBody))
+	if err != nil {
+		return nil, err
+	}
+	stream, _ := io.ReadAll(io.LimitReader(startRes.Body, maxExecBytes+8))
+	startRes.Body.Close()
+	if startRes.StatusCode >= 300 {
+		return nil, fmt.Errorf("docker exec start %d: %s", startRes.StatusCode, truncate(stream))
+	}
+	out, errOut := demuxDocker(stream)
+	inspRes, err := c.do(ctx, http.MethodGet, apiPrefix+"/exec/"+url.PathEscape(created.ID)+"/json", "", nil)
+	exit := 0
+	if err == nil {
+		inspRaw, _ := io.ReadAll(inspRes.Body)
+		inspRes.Body.Close()
+		var insp struct {
+			ExitCode int `json:"ExitCode"`
+		}
+		if json.Unmarshal(inspRaw, &insp) == nil {
+			exit = insp.ExitCode
+		}
+	}
+	return &ExecResult{Stdout: out, Stderr: errOut, ExitCode: exit}, nil
+}
+
+func demuxDocker(raw []byte) (stdout, stderr string) {
+	if len(raw) < 8 {
+		return string(raw), ""
+	}
+	looksMux := raw[1] == 0 && raw[2] == 0 && raw[3] == 0 && (raw[0] == 1 || raw[0] == 2)
+	if !looksMux {
+		return string(raw), ""
+	}
+	var out, errB strings.Builder
+	for len(raw) >= 8 {
+		stream := raw[0]
+		n := int(raw[4])<<24 | int(raw[5])<<16 | int(raw[6])<<8 | int(raw[7])
+		raw = raw[8:]
+		if n < 0 || n > len(raw) {
+			break
+		}
+		chunk := string(raw[:n])
+		raw = raw[n:]
+		if stream == 2 {
+			errB.WriteString(chunk)
+		} else {
+			out.WriteString(chunk)
+		}
+	}
+	return out.String(), errB.String()
 }
 
 func (c *Client) pull(ctx context.Context, image string) error {
