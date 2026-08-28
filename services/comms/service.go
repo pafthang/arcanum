@@ -9,6 +9,7 @@ import (
 	"github.com/pafthang/arcanum/services/comms/internal/apis"
 	"github.com/pafthang/arcanum/services/comms/internal/config"
 	"github.com/pafthang/arcanum/services/comms/internal/store"
+	mediaclient "github.com/pafthang/arcanum/services/media/client"
 	spaceclient "github.com/pafthang/arcanum/services/space/client"
 )
 
@@ -24,11 +25,17 @@ func Run() {
 	defer func() { _ = dbStore.Close() }()
 
 	var sc *spaceclient.Client
+	var mc *mediaclient.Client
 	if app.NC != nil {
 		if c, err := spaceclient.New(app.NC); err != nil {
 			slog.Warn("space client unavailable", "err", err)
 		} else {
 			sc = c
+		}
+		if c, err := mediaclient.New(app.NC); err != nil {
+			slog.Warn("media client unavailable", "err", err)
+		} else {
+			mc = c
 		}
 	}
 
@@ -36,6 +43,7 @@ func Run() {
 		Store:  dbStore,
 		NC:     app.NC,
 		Space:  sc,
+		Media:  mc,
 		Config: cfg,
 	}
 
