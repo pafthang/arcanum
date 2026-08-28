@@ -3,13 +3,13 @@
 Один активный кусок. Всё остальное — не сейчас.
 Очередь и инвентарь: [TODO.md](./TODO.md). Пробелы: [GAPS.md](./GAPS.md).
 
-## Срез (2026-08-28) — issue activity
+## Срез (2026-08-28) — API key login
 
 Закрыто:
 
-- create/update/comment issue пишут activity в `logg` (best-effort)
-- `GET /api/spaces/{spaceId}/issues/{issueId}/activity`
-- предыдущий glue-срез space/work на месте
+- `api_keys.key_hash` = SHA-256 секрета (`passwd.KeyHash`), не argon2
+- `POST /api/auth/api-key` `{secret}` → JWT как login
+- пароль агента по-прежнему argon2id (email+secret login тоже работает)
 
 ## Не делаем сейчас
 

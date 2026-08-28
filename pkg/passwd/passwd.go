@@ -2,8 +2,10 @@ package passwd
 
 import (
 	"crypto/rand"
+	"crypto/sha256"
 	"crypto/subtle"
 	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	"strings"
 
@@ -17,6 +19,12 @@ const (
 	argonKeyLen  = 32
 	argonSaltLen = 16
 )
+
+// KeyHash is a deterministic SHA-256 hex of an API key secret (lookup, not password).
+func KeyHash(secret string) string {
+	sum := sha256.Sum256([]byte(strings.TrimSpace(secret)))
+	return hex.EncodeToString(sum[:])
+}
 
 // Hash returns an encoded argon2id hash of password.
 func Hash(password string) (string, error) {

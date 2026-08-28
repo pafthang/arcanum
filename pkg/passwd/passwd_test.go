@@ -17,3 +17,14 @@ func TestHashVerify(t *testing.T) {
 		t.Fatal("verify passed for wrong password")
 	}
 }
+
+func TestKeyHashStable(t *testing.T) {
+	a := KeyHash("ak_abc")
+	b := KeyHash("ak_abc")
+	if a == "" || a != b || a == "ak_abc" {
+		t.Fatalf("key hash %q", a)
+	}
+	if KeyHash("ak_abd") == a {
+		t.Fatal("different secrets collided")
+	}
+}
