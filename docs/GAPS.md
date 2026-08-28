@@ -2,7 +2,7 @@
 
 Разница между **нашей реализацией** (`pafthang/arcanum`, дерево на 2026-08-28) и двумя ориентирами:
 
-- [Kuayle](https://github.com/carbogninalberto/kuayle) — Linear-like PM (Go + Echo + Postgres + SvelteKit)
+- [Kuayle](https://github.com/carbogninalberto/kuayle) — Linear-like PM (`BE/`+`UI/`) и отдельно Dev Machines (`devmachine/`, TECHNICAL.md)
 - [GoClaw](https://github.com/nextlevelbuilder/goclaw) — multi-tenant agent platform (Go monolith + Postgres/pgvector + embedded UI)
 
 Это не action plan. Приоритеты — отдельным проходом после чтения.
@@ -30,7 +30,7 @@ Arcanum — шасси из процессов на NATS. Kuayle и GoClaw — �
 | User `actor=user\|agent` | human member | user + agent identity |
 | `work` issue | issue | task board item (частично) |
 | `comms` channel | нет как SoT (есть comments/inbox) | messaging channel + web chat |
-| `agents` run/session/memory | Dev Machines / unreleased agents | agent pipeline + memory + skills |
+| `agents` run/session/memory | Dev Machine agent run (CLI в контейнере) | in-process pipeline + memory + skills |
 | `integ` connector/webhook | GitHub App + workspace webhooks | 7 messenger channels + webhooks |
 | `media` | S3/FS uploads | media tools + vault files |
 | `runtime` | Dev Machines (Docker) | exec/browser tools, Lite desktop |
@@ -43,7 +43,16 @@ UI: один клиент на gate, линия Kuayle/Svelte. Отдельны�
 
 ## A. Kuayle → Arcanum
 
-Источник фич: README Kuayle (workspaces, teams, issues, cycles, projects, GitHub, Dev Machines).
+Источник: [carbogninalberto/kuayle](https://github.com/carbogninalberto/kuayle) (`main`, Apache-2.0). Это **два слоя в одном монолите**, не один продукт:
+
+| Слой | Где в репо | Что это | Куда у нас |
+| ---- | ---------- | ------- | ---------- |
+| PM / Linear-like | `BE/` + `UI/` | workspace, teams, issues, cycles, projects, views, inbox, GitHub App, webhooks, Svelte | `space` + `work` + `integ` + UI на gate |
+| Dev Machines | `devmachine/` + [TECHNICAL.md](https://github.com/carbogninalberto/kuayle/blob/main/TECHNICAL.md) | Docker-машины, Machine Gateway, collector, agent CLI в контейнере | `runtime` (+ кусок `agents` как run, привязанный к machine) |
+
+Агенты Kuayle — не GoClaw-pipeline. Это CLI в контейнере (Claude Code / OpenCode / Codex / generic) на машине issue. Модели: `dev_machine_agent_runs`, `…_steps`, `…_providers`. Docker socket только у Machine Manager — это уже наше решение про `runtime`.
+
+NATS в Kuayle нет. Realtime — Echo + nhooyr WebSocket.
 
 | Область | Kuayle | У нас | Gap |
 | ------- | ------ | ----- | --- |
@@ -68,7 +77,10 @@ UI: один клиент на gate, линия Kuayle/Svelte. Отдельны�
 | Editor / palette | Tiptap, command palette | нет UI | нет клиента |
 | Dev Machines | Docker multi-container | `runtime` planned | нет |
 
-Итог по Kuayle: tenancy-скелет и issue-ядро есть. Нет PM-слоя (cycles/projects/views/inbox), нет UI, нет файлов, нет Dev Machines.
+Итог по Kuayle:
+
+- PM: tenancy-скелет и issue-ядро есть. Нет workflow/teams HTTP, PM-слоя (cycles/projects/views/inbox), UI, файлов.
+- Dev Machines: в Arcanum это не `work` и не GoClaw-tools. Схема машин (`dev_machines`, services, tickets, gateway) — только будущий `runtime`. Не тащить 20 таблиц `000033_dev_machines` в `work`/`agents`.
 
 ---
 
