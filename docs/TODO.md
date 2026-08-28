@@ -24,11 +24,11 @@
 - [x] `GET /api/spaces/{spaceId}/members`
 - [x] internal: get space, list for user, get user
 - [x] typed `services/space/client`
-- [ ] public invite / update member
-- [ ] public teams CRUD
-- [ ] public API keys / agent principal create
-- [ ] register / switch space
-- [ ] `internal.space.can` (константа есть, handler нет)
+- [x] public invite / update member
+- [x] public teams CRUD (list/create/get + add member)
+- [x] public API keys / agent principal create
+- [x] register / switch space
+- [x] `internal.space.can`
 
 ### `work` kernel
 
@@ -38,7 +38,7 @@
 - [x] `GET /api/spaces/{spaceId}/work/overview`
 - [x] events `issue.created` / `updated` / `assigned`
 - [x] internal get/list/overview
-- [ ] priority, due, sub-issues, relations, multi-assignee
+- [x] priority, due, parent, relations, extra assignees
 - [ ] cycles / projects / views / inbox
 
 ### `agents` kernel
@@ -49,7 +49,7 @@
 - [x] commands `run.start` / `run.cancel`
 - [x] stub pipeline (queued → running → finish, без LLM/tools)
 - [ ] providers, tool loop, MCP
-- [ ] consume `events.work.issue.assigned` → start run
+- [x] consume `events.work.issue.assigned` → start run
 - [ ] agent teams / delegation
 
 ### `comms` kernel (C1 закрыт)
@@ -59,7 +59,7 @@
 - [x] messages list/create, parent_id threads, blob_id
 - [x] WS catalog `/api/spaces/{spaceId}/channels/{channelId}/ws`
 - [x] internal get/list/create + inbound ingest
-- [ ] membership check через space на каждый mutate (как work) — сверить при ревью
+- [x] membership check через space на каждый mutate (как work)
 - [ ] presence / typing / reactions
 
 ### `integ` kernel
