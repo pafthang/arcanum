@@ -1,37 +1,36 @@
 # NOW
 
 Один активный кусок. Всё остальное — не сейчас.
-Очередь галок: [TODO.md](./TODO.md).
+Очередь и инвентарь: [TODO.md](./TODO.md). Пробелы: [GAPS.md](./GAPS.md).
 
-## Делаем
+## Срез закрыт (2026-08-28)
 
-`services/comms` — продуктовый чат Space. Треды Kuayle + inbound/agent post GoClaw.
-Внешние мессенджеры не в comms (`integ` later). Issue-комментарии остаются в `work`.
+`services/comms` kernel закрыт по чеклисту C1:
 
-Нужно:
+- `cmd/comms` + `cfgs/comms.json`
+- store channels / messages / threads / blob_id / integ inbound
+- public HTTP + WS catalog
+- internal RPC + ingest
+- `go test ./services/comms/...`, `go build ./cmd/comms`
 
-- каркас `cmd/comms` + `cfgs/comms.json` + store + client
-- `GET/POST /api/spaces/{spaceId}/channels`
-- `GET /api/spaces/{spaceId}/channels/{channelId}`
-- `GET/POST /api/spaces/{spaceId}/channels/{channelId}/messages`
-- WS catalog `/api/spaces/{spaceId}/channels/{channelId}/ws` → `events.comms.{spaceId}.{channelId}`
-- internal get/list/create + inbound ingest
-- consume `events.integ.message.inbound`
-- membership через `space` client (как `work`)
+Не открывать новый код, пока gaps не приоритизированы в action plan.
 
-## Не делаем
+## Не делаем сейчас
 
-- Telegram/Discord/Slack адаптеры (`integ`)
+- Telegram / Discord / Slack адаптеры (`integ`)
 - байты вложений (`media`)
-- issue comments (`work`)
-- analytics / agents runtime
+- Dev Machines / Docker socket (`runtime`)
+- LLM-провайдеры и tool loop (`agents`)
+- cycles / projects / sub-issues (`work`)
+- Svelte UI
 - второй HTTP-listen
-
-## Готово когда
-
-- `go test ./services/comms/...`
-- `go build ./cmd/comms`
 
 ## Следом
 
-`integ` inbound connectors. `agents` пишет в канал через `services/comms/client`.
+После разбора [GAPS.md](./GAPS.md) — один пункт в этот файл. Кандидаты (не очередь):
+
+- `space` public: invite / teams / api keys / switch space
+- `agents` реальный pipeline + provider
+- `integ` один живой канал (Telegram) или GitHub App не-заглушка
+- `media` blob store
+- UI-клиент на gate
