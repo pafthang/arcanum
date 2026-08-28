@@ -164,5 +164,5 @@ func (s *Store) HydrateIssue(ctx context.Context, iss *models.Issue) error {
 		return err
 	}
 	iss.Relations = rels
-	return nil
+	return s.FillIssueLabels(ctx, iss)
 }
