@@ -66,6 +66,9 @@ func registerComments(svc mini.Service, d *Deps) {
 			httpx.Error(req, 400, "Invalid body.", nil)
 			return
 		}
+		if !requireBlobInSpace(req, d, spaceID, in.BlobID) {
+			return
+		}
 		c, err := d.Store.AddComment(req.Context(), issueID, tc.UserID, in.Body, in.BlobID)
 		if err != nil {
 			httpx.Error(req, 400, err.Error(), nil)
