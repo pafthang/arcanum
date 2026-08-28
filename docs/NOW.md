@@ -3,11 +3,17 @@
 Один активный кусок. Всё остальное — не сейчас.
 Очередь и инвентарь: [TODO.md](./TODO.md). Пробелы: [GAPS.md](./GAPS.md).
 
-## Срез (2026-08-28) — media S3 / signed URL / attach
+## Срез (2026-08-28) — agents provider + tool loop
+
+- OpenAI-compatible `AGENTS_LLM_*` (пустой ключ → stub)
+- tools: `memory_search` / `memory_put` / `skill_list` / `work_get_issue`
+- skills + memory в system prompt
+
+Ранее — media S3 / signed URL / attach:
 
 Закрыто:
 
-- FS default, S3 если `MEDIA_S3_BUCKET` (СigV4, без AWS SDK)
+- FS default, S3 если `MEDIA_S3_BUCKET` (SigV4, без AWS SDK)
 - `DELETE /api/spaces/{spaceId}/blobs/{blobId}`
 - `GET /api/spaces/{spaceId}/blobs/{blobId}/url` — presign или HMAC
 - content принимает `?exp=&sig=` без JWT
@@ -17,7 +23,6 @@
 
 - Telegram / Discord / Slack адаптеры (`integ`)
 - Dev Machines / Docker socket (`runtime`)
-- LLM-провайдеры и tool loop (`agents`)
 - cycles / projects / views / inbox
 - Svelte UI
 - второй HTTP-listen
