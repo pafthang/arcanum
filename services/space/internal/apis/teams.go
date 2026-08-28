@@ -75,6 +75,33 @@ func registerTeams(svc mini.Service, d *Deps) {
 		httpx.JSON(req, 200, map[string]any{"team": t, "members": members})
 	}), mini.Public("GET", "/api/spaces/{spaceId}/teams/{teamId}", "space", "teams.get")))
 
+	must(svc.AddEndpoint("teams_update", mini.HandlerFunc(func(req mini.Request) {
+		spaceID := httpx.PathSpaceID(req)
+		teamID := strings.TrimSpace(mini.PathParam(req, "teamId"))
+		if spaceID == "" || teamID == "" {
+			httpx.Error(req, 400, "spaceId and teamId path required.", nil)
+			return
+		}
+		if !requirePerm(req, d, spaceID, models.PermTeamManage) {
+			return
+		}
+		var in models.UpdateTeamRequest
+		if err := httpx.BindJSON(req, &in); err != nil {
+			httpx.Error(req, 400, "Invalid body.", nil)
+			return
+		}
+		t, err := d.Store.UpdateTeam(req.Context(), spaceID, teamID, in.Name)
+		if err != nil {
+			httpx.Error(req, 400, err.Error(), nil)
+			return
+		}
+		if t == nil {
+			httpx.Error(req, 404, "Team not found.", nil)
+			return
+		}
+		httpx.JSON(req, 200, t)
+	}), mini.Public("PATCH", "/api/spaces/{spaceId}/teams/{teamId}", "space", "teams.update")))
+
 	must(svc.AddEndpoint("team_members_add", mini.HandlerFunc(func(req mini.Request) {
 		spaceID := httpx.PathSpaceID(req)
 		teamID := strings.TrimSpace(mini.PathParam(req, "teamId"))
