@@ -3,25 +3,23 @@
 Один активный кусок. Всё остальное — не сейчас.
 Очередь и инвентарь: [TODO.md](./TODO.md). Пробелы: [GAPS.md](./GAPS.md).
 
-## Срез (2026-08-28) — media S3 / signed URL / attach
+## Срез (2026-08-28) — runtime Docker start/stop
 
-Закрыто:
+- `RUNTIME_DOCKER_HOST` (unix:///var/run/docker.sock или tcp://)
+- create → pull + start `sleep infinity`, dockerId в строке
+- stop → Engine stop
+- пустой host → только metadata
 
-- FS default, S3 если `MEDIA_S3_BUCKET` (СigV4, без AWS SDK)
-- `DELETE /api/spaces/{spaceId}/blobs/{blobId}`
-- `GET /api/spaces/{spaceId}/blobs/{blobId}/url` — presign или HMAC
-- content принимает `?exp=&sig=` без JWT
-- comment/message `blobId` только из того же space
+Ранее — runtime kernel + agents LLM + media S3.
 
 ## Не делаем сейчас
 
 - Telegram / Discord / Slack адаптеры (`integ`)
-- Dev Machines / Docker socket (`runtime`)
-- LLM-провайдеры и tool loop (`agents`)
+- exec / machine-gateway
 - cycles / projects / views / inbox
 - Svelte UI
 - второй HTTP-listen
 
 ## Следом
 
-После разбора [GAPS.md](./GAPS.md) — один пункт.
+Один живой integ или exec в контейнер.

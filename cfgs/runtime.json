@@ -1,0 +1,8 @@
+{
+  "name": "runtime",
+  "description": "Dev machines (Docker socket lives only here)",
+  "order": 100,
+  "env": {
+    "RUNTIME_DOCKER_HOST": ""
+  }
+}

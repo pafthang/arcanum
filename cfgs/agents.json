@@ -2,5 +2,9 @@
   "name": "agents",
   "description": "Agent run, session and memory",
   "order": 70,
-  "env": {}
+  "env": {
+    "AGENTS_LLM_BASE_URL": "https://api.openai.com/v1",
+    "AGENTS_LLM_MODEL": "gpt-4o-mini",
+    "AGENTS_LLM_MAX_STEPS": "8"
+  }
 }
