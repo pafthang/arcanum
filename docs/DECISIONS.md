@@ -3,6 +3,8 @@
 Короткие факты. Новая строка = новое решение. Не переписывать историю.
 
 - 2026-08-28: Шасси платформы — этот репозиторий (Arcanum). Kuayle и GoClaw не становятся корнем.
+- 2026-08-28: Ориентир агентов — https://github.com/nextlevelbuilder/goclaw (не форки Annmys/roelfdiedericks/smallnest).
+- 2026-08-28: Ориентир PM/UI — https://github.com/carbogninalberto/kuayle.
 - 2026-08-28: Tenant публично называется Space. `space_id` в JWT. Отдельного публичного `workspace_id` нет.
 - 2026-08-28: Space = Kuayle workspace = GoClaw tenant.
 - 2026-08-28: Team — вложенная группа внутри Space, не tenant.
@@ -19,3 +21,4 @@
 - 2026-08-28: Комментарии issue — агрегат `work`. Продуктовый чат — `comms`. Шины и audit — `nats` / `logg`.
 - 2026-08-28: Точка входа сервиса — корневой `cmd/<name>/main.go`. Cfg — корневой `cfgs/<name>.json`.
 - 2026-08-28: SQLite только `pkg/sqldb` (`modernc.org/sqlite`). CGO/`mattn` запрещены.
+- 2026-08-28: Документы сверяются с деревом, не с планом. Статус `planned` только если нет `cmd/`+`cfgs/`. Пробелы к Kuayle/GoClaw живут в `docs/GAPS.md`, не в NOW.
