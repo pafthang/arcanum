@@ -73,6 +73,9 @@ func registerMessages(svc mini.Service, d *Deps) {
 			httpx.Error(req, 400, "Invalid body.", nil)
 			return
 		}
+		if !requireBlobInSpace(req, d, spaceID, in.BlobID) {
+			return
+		}
 		msg, err := d.Store.CreateMessage(req.Context(), channelID, spaceID, tc.UserID, in.Body, in.ParentID, in.BlobID, models.SourceUser, "")
 		if err != nil {
 			httpx.Error(req, 400, err.Error(), nil)
