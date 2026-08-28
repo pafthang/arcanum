@@ -1,0 +1,10 @@
+{
+  "name": "ctrl",
+  "description": "Platform control plane: lifecycle API + optional supervisor (ctrl -up); edge config CLI remains cmd/config",
+  "order": 120,
+  "enabled": false,
+  "env": {
+    "CTRL_UP": "false",
+    "CONFIG_BUCKET": "MINI_CP"
+  }
+}

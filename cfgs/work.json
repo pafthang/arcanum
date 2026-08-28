@@ -1,0 +1,6 @@
+{
+  "name": "work",
+  "description": "Issue aggregate (items, status, comments)",
+  "order": 60,
+  "env": {}
+}

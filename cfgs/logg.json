@@ -1,0 +1,9 @@
+{
+  "name": "logg",
+  "description": "Centralized logging aggregator",
+  "order": 99,
+  "env": {
+    "LOGG_LIST_PER_PAGE": "100",
+    "LOGG_LIST_MAX": "500"
+  }
+}

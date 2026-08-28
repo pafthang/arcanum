@@ -1,0 +1,6 @@
+{
+  "name": "space",
+  "description": "Identity and tenancy (users, spaces, teams)",
+  "order": 50,
+  "env": {}
+}

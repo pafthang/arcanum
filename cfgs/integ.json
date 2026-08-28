@@ -1,0 +1,6 @@
+{
+  "name": "integ",
+  "description": "External connectors (GitHub, webhooks, channels)",
+  "order": 85,
+  "env": {}
+}

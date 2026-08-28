@@ -1,0 +1,113 @@
+# Optima — https://taskfile.dev (github.com/go-task/task)
+#
+# Install:
+#   go install github.com/go-task/task/v3/cmd/task@latest
+#   # or: https://taskfile.dev/installation/
+#
+# Usage:
+#   task --list
+#   task up | task down | task seed
+#   task build && task test
+#   task client:typecheck
+#
+# Override vars:  task seed GATE_URL=http://127.0.0.1:8080
+# Extra args:     task down -- --dry-run
+version: "3"
+
+vars:
+  GATE_URL: '{{.GATE_URL | default "http://127.0.0.1:8080"}}'
+
+
+tasks:
+  default:
+    desc: List available tasks
+    silent: true
+    cmds:
+      - task --list
+
+  # ── Stack ──────────────────────────────────────────────────────────
+
+  up:
+    desc: Start full stack (ctrl -up)
+    cmds:
+      - go run ./cmd/ctrl -up
+
+  dev:
+    desc: Start backend stack and Arc frontend concurrently
+    deps: [up, arc:dev]
+
+  down:
+    aliases: [kill]
+    desc: Stop local Optima stack processes (scripts/kill-all.sh)
+    cmds:
+      - bash scripts/kill-all.sh {{.CLI_ARGS}}
+
+  down:dry:
+    desc: List stack processes without killing
+    cmds:
+      - bash scripts/kill-all.sh --dry-run
+
+  run:*:
+    desc: "Run one service: task run:gate | run:logg | …"
+    vars:
+      SVC: "{{index .MATCH 0}}"
+    cmds:
+      - go run ./cmd/{{.SVC}}
+
+
+  # ── Go ─────────────────────────────────────────────────────────────
+
+  build:
+    desc: go build ./...
+    cmds:
+      - go build ./...
+
+  test:
+    desc: go test ./...
+    cmds:
+      - go test ./...
+
+  test:svc:*:
+    desc: "Test one service: task test:svc:gate"
+    vars:
+      SVC: "{{index .MATCH 0}}"
+    cmds:
+      - go test ./services/{{.SVC}}/...
+
+  tidy:
+    desc: go mod tidy
+    cmds:
+      - go mod tidy
+
+  # ── Catalog / health ───────────────────────────────────────────────
+
+  catalog:
+    desc: Pretty-print GET /_catalog
+    cmds:
+      - curl -sS "{{.GATE_URL}}/_catalog" | python3 -m json.tool
+
+  health:
+    desc: Probe GET /healthz
+    cmds:
+      - curl -sS -o /dev/null -w "%{http_code}\n" --connect-timeout 2 --max-time 3 "{{.GATE_URL}}/healthz"
+
+  # ── Planning ───────────────────────────────────────────────────────
+
+  plan:progress:
+    desc: Count planning checkboxes (default CURRENT.md)
+    cmds:
+      - |
+        set -euo pipefail
+        if [ -n "{{.CLI_ARGS}}" ]; then
+          bash scripts/planning-progress.sh {{.CLI_ARGS}}
+        else
+          bash scripts/planning-progress.sh docs/planning/CURRENT.md
+        fi
+
+  # ── Composite ──────────────────────────────────────────────────────
+
+  check:
+    desc: build + test
+    cmds:
+      - task: build
+      - task: test

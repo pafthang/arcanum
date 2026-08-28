@@ -1,0 +1,6 @@
+{
+  "name": "comms",
+  "description": "Channels and messages inside a space",
+  "order": 80,
+  "env": {}
+}

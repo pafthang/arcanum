@@ -1,0 +1,67 @@
+# ── Runtime / local data ────────────────────────────────────────────
+/data/
+*.db
+*.db-shm
+*.db-wal
+*.log
+
+# ── Secrets & local env ─────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+id_rsa*
+*.p12
+*.pfx
+secrets/
+**/credentials.json
+**/service-account*.json
+
+# ── Go ──────────────────────────────────────────────────────────────
+bin/
+dist/
+*.exe
+*.test
+*.out
+coverage.out
+coverage.html
+vendor/
+/tmp/
+
+# ── Node / Bun (clients) ────────────────────────────────────────────
+node_modules/
+.npm
+.pnpm-store/
+.yarn/
+*.tsbuildinfo
+# keep lockfile: clients/bun.lock
+
+# Generated app routes (sample fixture is committed)
+clients/svelte/src/generated/routes.ts
+!clients/svelte/src/generated/routes.sample.ts
+
+# ── IDE / OS ────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+*.code-workspace
+
+# ── Tooling caches ──────────────────────────────────────────────────
+.cache/
+.turbo/
+.next/
+.svelte-kit/
+.vite/
+.eslintcache
+.task/
+*.prof
+*.pprof
+
+# ── Catalog dumps (local) ───────────────────────────────────────────
+/catalog.json
+/docs/api/snapshots/
