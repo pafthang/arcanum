@@ -6,13 +6,13 @@ import (
 	"database/sql"
 	"encoding/hex"
 	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/pafthang/arcanum/pkg/idgen"
 	"github.com/pafthang/arcanum/pkg/sqldb"
+	"github.com/pafthang/arcanum/services/media/internal/objectstore"
 	"github.com/pafthang/arcanum/services/media/models"
 )
 
@@ -20,10 +20,16 @@ import (
 type Store struct {
 	db      *sql.DB
 	dataDir string
+	Objects objectstore.Backend
 }
 
 // OpenStore opens dataDir/media.db and ensures the blob directory.
 func OpenStore(dataDir string) (*Store, error) {
+	return OpenStoreBackend(dataDir, objectstore.NewFS(filepath.Join(dataDir, "blobs")))
+}
+
+// OpenStoreBackend opens metadata DB with an explicit object backend.
+func OpenStoreBackend(dataDir string, objects objectstore.Backend) (*Store, error) {
 	db, err := sqldb.Open(dataDir, "media")
 	if err != nil {
 		return nil, err
@@ -32,11 +38,14 @@ func OpenStore(dataDir string) (*Store, error) {
 		_ = db.Close()
 		return nil, err
 	}
-	if err := os.MkdirAll(filepath.Join(dataDir, "blobs"), 0o755); err != nil {
-		_ = db.Close()
-		return nil, err
+	if objects == nil {
+		objects = objectstore.NewFS(filepath.Join(dataDir, "blobs"))
 	}
-	return &Store{db: db, dataDir: dataDir}, nil
+	return &Store{db: db, dataDir: dataDir, Objects: objects}, nil
+}
+
+func (s *Store) objectKey(spaceID, id string) string {
+	return strings.TrimSpace(spaceID) + "/" + strings.TrimSpace(id)
 }
 
 func migrate(db *sql.DB) error {
@@ -71,7 +80,7 @@ func (s *Store) blobPath(spaceID, id string) string {
 	return filepath.Join(s.dataDir, "blobs", spaceID, id)
 }
 
-// Put writes bytes to disk and inserts metadata.
+// Put writes bytes to the object backend and inserts metadata.
 func (s *Store) Put(ctx context.Context, spaceID, filename, contentType, actorID string, data []byte) (*models.Blob, error) {
 	spaceID = strings.TrimSpace(spaceID)
 	filename = strings.TrimSpace(filename)
@@ -96,20 +105,19 @@ func (s *Store) Put(ctx context.Context, spaceID, filename, contentType, actorID
 		ActorID:     strings.TrimSpace(actorID),
 		CreatedAt:   nowRFC3339(),
 	}
-	dir := filepath.Join(s.dataDir, "blobs", spaceID)
-	if err := os.MkdirAll(dir, 0o755); err != nil {
-		return nil, err
-	}
-	path := s.blobPath(spaceID, b.ID)
-	if err := os.WriteFile(path, data, 0o644); err != nil {
-		return nil, err
+	if s.Objects != nil {
+		if err := s.Objects.Put(ctx, s.objectKey(spaceID, b.ID), contentType, data); err != nil {
+			return nil, err
+		}
 	}
 	_, err := s.db.ExecContext(ctx, `
 INSERT INTO blobs (id, space_id, filename, content_type, size, sha256, actor_id, created_at)
 VALUES (?,?,?,?,?,?,?,?)`,
 		b.ID, b.SpaceID, b.Filename, b.ContentType, b.Size, b.SHA256, b.ActorID, b.CreatedAt)
 	if err != nil {
-		_ = os.Remove(path)
+		if s.Objects != nil {
+			_ = s.Objects.Delete(ctx, s.objectKey(spaceID, b.ID))
+		}
 		return nil, err
 	}
 	return b, nil
@@ -137,7 +145,10 @@ func (s *Store) ReadBytes(ctx context.Context, spaceID, id string) (*models.Blob
 	if err != nil || meta == nil {
 		return meta, nil, err
 	}
-	data, err := os.ReadFile(s.blobPath(spaceID, id))
+	if s.Objects == nil {
+		return meta, nil, fmt.Errorf("object backend missing")
+	}
+	data, err := s.Objects.Get(ctx, s.objectKey(spaceID, id))
 	if err != nil {
 		return nil, nil, err
 	}
