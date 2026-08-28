@@ -55,9 +55,10 @@ func registerIssues(svc mini.Service, d *Deps) {
 			return
 		}
 		iss, _ = d.Store.GetIssueInSpace(req.Context(), spaceID, iss.ID)
-		publishIssue(d, subjects.EventWorkIssueCreated, "issue.created", iss)
+		actor := httpx.SpaceContext(req).UserID
+		publishIssueActor(d, subjects.EventWorkIssueCreated, "issue.created", actor, iss)
 		if iss.AssigneeID != "" {
-			publishIssue(d, subjects.EventWorkIssueAssigned, "issue.assigned", iss)
+			publishIssueActor(d, subjects.EventWorkIssueAssigned, "issue.assigned", actor, iss)
 		}
 		httpx.JSON(req, 201, iss)
 	}), mini.Public("POST", "/api/spaces/{spaceId}/issues", "work", "issue.create")))
@@ -134,12 +135,40 @@ func registerIssues(svc mini.Service, d *Deps) {
 			return
 		}
 		iss, _ = d.Store.GetIssueInSpace(req.Context(), spaceID, issueID)
-		publishIssue(d, subjects.EventWorkIssueUpdated, "issue.updated", iss)
+		actor := httpx.SpaceContext(req).UserID
+		publishIssueActor(d, subjects.EventWorkIssueUpdated, "issue.updated", actor, iss)
 		if in.AssigneeID != nil && strings.TrimSpace(*in.AssigneeID) != "" && *in.AssigneeID != cur.AssigneeID {
-			publishIssue(d, subjects.EventWorkIssueAssigned, "issue.assigned", iss)
+			publishIssueActor(d, subjects.EventWorkIssueAssigned, "issue.assigned", actor, iss)
 		}
 		httpx.JSON(req, 200, iss)
 	}), mini.Public("PATCH", "/api/spaces/{spaceId}/issues/{issueId}", "work", "issue.update")))
+
+	must(svc.AddEndpoint("issues_activity", mini.HandlerFunc(func(req mini.Request) {
+		spaceID := httpx.PathSpaceID(req)
+		issueID := strings.TrimSpace(mini.PathParam(req, "issueId"))
+		if spaceID == "" || issueID == "" {
+			httpx.Error(req, 400, "spaceId and issueId path required.", nil)
+			return
+		}
+		if !requireMember(req, d, spaceID) {
+			return
+		}
+		iss, err := d.Store.GetIssueInSpace(req.Context(), spaceID, issueID)
+		if err != nil || iss == nil {
+			httpx.Error(req, 404, "Issue not found.", nil)
+			return
+		}
+		if d.Logg == nil {
+			httpx.JSON(req, 200, map[string]any{"items": []any{}})
+			return
+		}
+		items, err := d.Logg.ListTargetActivity(req.Context(), spaceID, "issue", issueID, 50)
+		if err != nil {
+			httpx.Error(req, 500, err.Error(), nil)
+			return
+		}
+		httpx.JSON(req, 200, map[string]any{"items": items})
+	}), mini.Public("GET", "/api/spaces/{spaceId}/issues/{issueId}/activity", "work", "issue.activity")))
 
 	must(svc.AddEndpoint("issue_relations_create", mini.HandlerFunc(func(req mini.Request) {
 		spaceID := httpx.PathSpaceID(req)
