@@ -61,7 +61,7 @@ func registerKeys(svc mini.Service, d *Deps) {
 			httpx.Error(req, 500, err.Error(), nil)
 			return
 		}
-		key, err := d.Store.CreateAPIKey(req.Context(), u.ID, hash)
+		key, err := d.Store.CreateAPIKey(req.Context(), u.ID, passwd.KeyHash(raw))
 		if err != nil {
 			httpx.Error(req, 500, err.Error(), nil)
 			return
