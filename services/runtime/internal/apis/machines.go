@@ -40,14 +40,27 @@ func registerPublic(svc mini.Service, d *Deps) {
 			httpx.Error(req, 400, "Invalid body.", nil)
 			return
 		}
-		status := models.StatusRecorded
-		if d.Config.HasDocker() {
-			status = models.StatusRunning
-		}
-		m, err := d.Store.Create(req.Context(), spaceID, in.Name, in.Image, in.AgentID, status)
+		m, err := d.Store.Create(req.Context(), spaceID, in.Name, in.Image, in.AgentID, models.StatusRecorded)
 		if err != nil {
 			httpx.Error(req, 400, err.Error(), nil)
 			return
+		}
+		if d.Docker != nil {
+			cname := "arc-" + m.ID
+			if len(cname) > 16 {
+				cname = cname[:16]
+			}
+			id, err := d.Docker.Start(req.Context(), cname, m.Image)
+			if err != nil {
+				m, _ = d.Store.SetStatus(req.Context(), spaceID, m.ID, models.StatusFailed, "", err.Error())
+				httpx.JSON(req, 201, m)
+				return
+			}
+			m, err = d.Store.SetStatus(req.Context(), spaceID, m.ID, models.StatusRunning, id, "")
+			if err != nil {
+				httpx.Error(req, 500, err.Error(), nil)
+				return
+			}
 		}
 		httpx.JSON(req, 201, m)
 	}), mini.Public("POST", "/api/spaces/{spaceId}/machines", "runtime", "machine.create")))
@@ -92,6 +105,12 @@ func registerPublic(svc mini.Service, d *Deps) {
 		if m == nil {
 			httpx.Error(req, 404, "Machine not found.", nil)
 			return
+		}
+		if d.Docker != nil && m.DockerID != "" {
+			if err := d.Docker.Stop(req.Context(), m.DockerID); err != nil {
+				httpx.Error(req, 502, err.Error(), nil)
+				return
+			}
 		}
 		m, err = d.Store.SetStatus(req.Context(), spaceID, id, models.StatusStopped, "", "")
 		if err != nil {
