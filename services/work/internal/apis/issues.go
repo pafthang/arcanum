@@ -50,7 +50,7 @@ func registerIssues(svc mini.Service, d *Deps) {
 			httpx.Error(req, 400, err.Error(), nil)
 			return
 		}
-		if err := applyIssueExtras(req.Context(), d, spaceID, iss.ID, in.Priority, in.DueAt, in.ParentID, in.AssigneeIDs); err != nil {
+		if err := applyIssueExtras(req.Context(), d, spaceID, iss.ID, in.Priority, in.DueAt, in.ParentID, in.AssigneeIDs, in.LabelIDs); err != nil {
 			httpx.Error(req, 400, err.Error(), nil)
 			return
 		}
@@ -129,7 +129,7 @@ func registerIssues(svc mini.Service, d *Deps) {
 		if in.ParentID != nil {
 			parent = *in.ParentID
 		}
-		if err := applyIssueExtras(req.Context(), d, spaceID, iss.ID, priority, dueAt, parent, in.AssigneeIDs); err != nil {
+		if err := applyIssueExtras(req.Context(), d, spaceID, iss.ID, priority, dueAt, parent, in.AssigneeIDs, in.LabelIDs); err != nil {
 			httpx.Error(req, 400, err.Error(), nil)
 			return
 		}
