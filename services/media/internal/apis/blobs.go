@@ -6,6 +6,7 @@ import (
 
 	"github.com/pafthang/arcanum/pkg/httpx"
 	"github.com/pafthang/arcanum/pkg/mini"
+	"github.com/pafthang/arcanum/services/media/internal/objectstore"
 	"github.com/pafthang/arcanum/services/media/models"
 )
 
@@ -83,7 +84,8 @@ func registerPublic(svc mini.Service, d *Deps) {
 			httpx.Error(req, 400, "spaceId and blobId path required.", nil)
 			return
 		}
-		if !requireMember(req, d, spaceID) {
+		signedOK := objectstore.LocalOK(d.Config.SignSecret, spaceID, blobID, httpx.Query(req, "sig"), httpx.Query(req, "exp"))
+		if !signedOK && !requireMember(req, d, spaceID) {
 			return
 		}
 		meta, data, err := d.Store.ReadBytes(req.Context(), spaceID, blobID)
@@ -101,7 +103,7 @@ func registerPublic(svc mini.Service, d *Deps) {
 			"X-Blob-Id":           []string{meta.ID},
 			"X-Blob-Sha256":       []string{meta.SHA256},
 		}))
-	}), mini.Public("GET", "/api/spaces/{spaceId}/blobs/{blobId}/content", "media", "blob.content")))
+	}), mini.PublicWithAuth("GET", "/api/spaces/{spaceId}/blobs/{blobId}/content", "media", "blob.content", mini.AuthOptional)))
 }
 
 func readUpload(req mini.Request) (filename, contentType string, data []byte) {

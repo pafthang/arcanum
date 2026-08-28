@@ -91,6 +91,8 @@ const (
 	PublicMediaBlobCreate  = "public.media.blob.create"
 	PublicMediaBlobGet     = "public.media.blob.get"
 	PublicMediaBlobContent = "public.media.blob.content"
+	PublicMediaBlobURL     = "public.media.blob.url"
+	PublicMediaBlobDelete  = "public.media.blob.delete"
 )
 
 // Internal RPC.

@@ -110,6 +110,9 @@ func createInternal(ctx context.Context, d *Deps, in models.CreateMessageInterna
 	if source == "" {
 		source = models.SourceAgent
 	}
+	if err := checkBlob(ctx, d, ch.SpaceID, in.BlobID); err != nil {
+		return nil, err
+	}
 	msg, err := d.Store.CreateMessage(ctx, ch.ID, ch.SpaceID, in.ActorID, in.Body, in.ParentID, in.BlobID, source, in.ExternalRef)
 	if err != nil {
 		return nil, err
@@ -127,6 +130,9 @@ func ingest(ctx context.Context, d *Deps, in models.InboundMessage) (*models.Mes
 	}
 	ch, err := resolveChannel(ctx, d, in.SpaceID, in.ChannelID, in.ChannelName, in.TeamID, in.Kind)
 	if err != nil {
+		return nil, err
+	}
+	if err := checkBlob(ctx, d, ch.SpaceID, in.BlobID); err != nil {
 		return nil, err
 	}
 	msg, err := d.Store.CreateMessage(ctx, ch.ID, ch.SpaceID, in.ActorID, in.Body, in.ParentID, in.BlobID, models.SourceInteg, in.ExternalRef)
