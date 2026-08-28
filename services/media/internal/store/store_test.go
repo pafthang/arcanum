@@ -30,3 +30,23 @@ func TestPutGetList(t *testing.T) {
 		t.Fatalf("list: %v %#v", err, list)
 	}
 }
+
+func TestDeleteBlob(t *testing.T) {
+	s, err := OpenStore(filepath.Join(t.TempDir(), "data"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	ctx := context.Background()
+	b, err := s.Put(ctx, "sp1", "a.txt", "text/plain", "u1", []byte("x"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Delete(ctx, "sp1", b.ID); err != nil {
+		t.Fatal(err)
+	}
+	got, err := s.GetMeta(ctx, "sp1", b.ID)
+	if err != nil || got != nil {
+		t.Fatalf("after delete: %v %#v", err, got)
+	}
+}
