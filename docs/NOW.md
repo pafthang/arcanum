@@ -3,18 +3,23 @@
 Один активный кусок. Всё остальное — не сейчас.
 Очередь и инвентарь: [TODO.md](./TODO.md). Пробелы: [GAPS.md](./GAPS.md).
 
-## Срез (2026-08-28) — API key login
+## Срез (2026-08-28) — media kernel
 
 Закрыто:
 
-- `api_keys.key_hash` = SHA-256 секрета (`passwd.KeyHash`), не argon2
-- `POST /api/auth/api-key` `{secret}` → JWT как login
-- пароль агента по-прежнему argon2id (email+secret login тоже работает)
+- `cmd/media` + `cfgs/media.json` order 90
+- SQLite metadata + files under `data/media/blobs/{spaceId}/{id}`
+- `GET/POST /api/spaces/{spaceId}/blobs`
+- `GET /api/spaces/{spaceId}/blobs/{blobId}` metadata
+- `GET /api/spaces/{spaceId}/blobs/{blobId}/content` raw bytes
+- internal `internal.media.get` / `internal.media.get_bytes`
+- typed `services/media/client`
+- лимит `MEDIA_MAX_BYTES` (default 1MiB — NATS payload)
 
 ## Не делаем сейчас
 
 - Telegram / Discord / Slack адаптеры (`integ`)
-- байты вложений (`media`)
+- S3 backend
 - Dev Machines / Docker socket (`runtime`)
 - LLM-провайдеры и tool loop (`agents`)
 - cycles / projects / views / inbox
@@ -23,9 +28,4 @@
 
 ## Следом
 
-После разбора [GAPS.md](./GAPS.md) — один пункт. Кандидаты:
-
-- UI-клиент на gate
-- `agents` один OpenAI-compatible provider
-- `integ` один живой канал или GitHub App
-- `media` blob store
+После разбора [GAPS.md](./GAPS.md) — один пункт.
