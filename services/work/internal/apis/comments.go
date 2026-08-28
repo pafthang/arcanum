@@ -5,6 +5,7 @@ import (
 
 	"github.com/pafthang/arcanum/pkg/httpx"
 	"github.com/pafthang/arcanum/pkg/mini"
+	loggmodels "github.com/pafthang/arcanum/services/logg/models"
 	"github.com/pafthang/arcanum/services/work/models"
 )
 
@@ -69,6 +70,16 @@ func registerComments(svc mini.Service, d *Deps) {
 		if err != nil {
 			httpx.Error(req, 400, err.Error(), nil)
 			return
+		}
+		if d.Logg != nil {
+			d.Logg.AppendActivityAsync(&loggmodels.Activity{
+				SpaceID:    spaceID,
+				TargetType: "issue",
+				TargetID:   issueID,
+				ActorID:    tc.UserID,
+				Type:       "issue.commented",
+				Summary:    "comment on " + iss.Title,
+			})
 		}
 		httpx.JSON(req, 201, c)
 	}), mini.Public("POST", "/api/spaces/{spaceId}/issues/{issueId}/comments", "work", "comment.create")))

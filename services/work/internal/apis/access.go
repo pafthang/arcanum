@@ -7,6 +7,7 @@ import (
 	"github.com/pafthang/arcanum/pkg/events"
 	"github.com/pafthang/arcanum/pkg/httpx"
 	"github.com/pafthang/arcanum/pkg/mini"
+	loggmodels "github.com/pafthang/arcanum/services/logg/models"
 	"github.com/pafthang/arcanum/services/work/models"
 )
 
@@ -87,10 +88,32 @@ func applyIssueExtras(ctx context.Context, d *Deps, spaceID, issueID, priority, 
 }
 
 func publishIssue(d *Deps, subject, typ string, iss *models.Issue) {
-	if d.NC == nil || iss == nil {
+	publishIssueActor(d, subject, typ, "", iss)
+}
+
+func publishIssueActor(d *Deps, subject, typ, actorID string, iss *models.Issue) {
+	if iss == nil {
 		return
 	}
-	_ = events.PublishData(d.NC, subject, typ, "work", iss)
+	if d.NC != nil {
+		_ = events.PublishData(d.NC, subject, typ, "work", iss)
+	}
+	if d.Logg == nil {
+		return
+	}
+	d.Logg.AppendActivityAsync(&loggmodels.Activity{
+		SpaceID:    iss.SpaceID,
+		TargetType: "issue",
+		TargetID:   iss.ID,
+		ActorID:    actorID,
+		Type:       typ,
+		Summary:    typ + ": " + iss.Title,
+		Payload: map[string]any{
+			"status":     iss.Status,
+			"assigneeId": iss.AssigneeID,
+			"priority":   iss.Priority,
+		},
+	})
 }
 
 type simpleError string
