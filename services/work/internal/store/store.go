@@ -31,6 +31,10 @@ func OpenStore(dataDir string) (*Store, error) {
 		_ = db.Close()
 		return nil, err
 	}
+	if err := migrateIssueExtra(db); err != nil {
+		_ = db.Close()
+		return nil, err
+	}
 	return &Store{db: db}, nil
 }
 
@@ -127,9 +131,16 @@ func scanIssue(row *sql.Row) (*models.Issue, error) {
 
 // GetIssue returns an issue by id.
 func (s *Store) GetIssue(ctx context.Context, id string) (*models.Issue, error) {
-	return scanIssue(s.db.QueryRowContext(ctx, `
+	iss, err := scanIssue(s.db.QueryRowContext(ctx, `
 SELECT id, space_id, title, body, status, assignee_id, created_at, updated_at
 FROM issues WHERE id = ?`, strings.TrimSpace(id)))
+	if err != nil || iss == nil {
+		return iss, err
+	}
+	if err := s.HydrateIssue(ctx, iss); err != nil {
+		return nil, err
+	}
+	return iss, nil
 }
 
 // GetIssueInSpace returns an issue if it belongs to spaceID.
@@ -162,7 +173,15 @@ ORDER BY created_at DESC`, strings.TrimSpace(spaceID))
 		}
 		out = append(out, iss)
 	}
-	return out, rows.Err()
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	for i := range out {
+		if err := s.HydrateIssue(ctx, &out[i]); err != nil {
+			return nil, err
+		}
+	}
+	return out, nil
 }
 
 // UpdateIssue applies a partial update. nil fields are left unchanged.
