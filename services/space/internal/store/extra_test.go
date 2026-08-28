@@ -49,4 +49,14 @@ func TestUpdateMemberAndTeamsList(t *testing.T) {
 	if err != nil || len(list) != 1 || list[0].ID != team.ID {
 		t.Fatalf("list teams: %v %#v", err, list)
 	}
+	renamed, err := s.UpdateTeam(ctx, sp.ID, team.ID, "core-2")
+	if err != nil || renamed.Name != "core-2" {
+		t.Fatalf("rename team: %v %#v", err, renamed)
+	}
+	if err := s.RemoveMember(ctx, sp.ID, u.ID); err != nil {
+		t.Fatalf("remove member: %v", err)
+	}
+	if err := s.RemoveMember(ctx, sp.ID, u2.ID); err == nil {
+		t.Fatal("expected last owner remove to fail")
+	}
 }

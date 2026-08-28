@@ -3,12 +3,12 @@
 Один активный кусок. Всё остальное — не сейчас.
 Очередь и инвентарь: [TODO.md](./TODO.md). Пробелы: [GAPS.md](./GAPS.md).
 
-## Срез (2026-08-28) — space public + work fields
+## Срез (2026-08-28) — space public + work fields + glue
 
-Закрыто по приказу «добить backend из TODO»:
+Закрыто:
 
-- `space`: register, switch-space, invite, update member, teams HTTP, API keys / agent principal, `internal.space.can`
-- `work`: priority, due, parent, extra assignees, relations
+- `space`: register, switch-space, invite, update/remove member, teams HTTP + rename, API keys, `internal.space.can`
+- `work`: priority, due, parent, extra assignees, relations, labelIds create/update + hydrate
 - `agents` consume `events.work.issue.assigned` — уже было в коде
 - `comms` membership check на mutate — уже было в коде
 

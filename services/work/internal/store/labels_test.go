@@ -46,6 +46,14 @@ func TestLabelsOnIssue(t *testing.T) {
 		t.Fatalf("list: %v %#v", err, list)
 	}
 
+	if err := s.SetIssueFields(ctx, iss.ID, "high", "2026-09-01", ""); err != nil {
+		t.Fatalf("fields: %v", err)
+	}
+	got, err := s.GetIssue(ctx, iss.ID)
+	if err != nil || got.Priority != "high" || got.DueAt != "2026-09-01" || len(got.Labels) != 1 {
+		t.Fatalf("hydrate: %v %#v", err, got)
+	}
+
 	if err := s.SetIssueLabels(ctx, "default", iss.ID, nil); err != nil {
 		t.Fatalf("clear: %v", err)
 	}
