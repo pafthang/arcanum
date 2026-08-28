@@ -18,7 +18,7 @@
 | `agents`  | Run, session, memory, skills     | 70    | live / kernel | [agents.md](./services/agents.md) |
 | `comms`   | Channels, messages, WS catalog   | 80    | live / kernel | [comms.md](./services/comms.md)   |
 | `integ`   | Connectors, hooks, webhooks      | 85    | live / kernel | [integ.md](./services/integ.md)   |
-| `media`   | Blobs / files                    | 90    | planned       | [media.md](./services/media.md)   |
+| `media`   | Blobs / files                    | 90    | live / kernel | [media.md](./services/media.md)   |
 | `runtime` | Dev machines, Docker socket      | 100   | planned       | [runtime.md](./services/runtime.md) |
 | `logg`    | Logs + activity                  | 110   | live          | [logg.md](./services/logg.md)     |
 | `ctrl`    | Lifecycle + supervisor           | 120   | live          | [ctrl.md](./services/ctrl.md)     |
