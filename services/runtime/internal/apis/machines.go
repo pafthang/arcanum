@@ -119,4 +119,49 @@ func registerPublic(svc mini.Service, d *Deps) {
 		}
 		httpx.JSON(req, 200, m)
 	}), mini.Public("POST", "/api/spaces/{spaceId}/machines/{machineId}/stop", "runtime", "machine.stop")))
+
+	must(svc.AddEndpoint("machines_exec", mini.HandlerFunc(func(req mini.Request) {
+		spaceID := httpx.PathSpaceID(req)
+		id := strings.TrimSpace(mini.PathParam(req, "machineId"))
+		if spaceID == "" || id == "" {
+			httpx.Error(req, 400, "spaceId and machineId path required.", nil)
+			return
+		}
+		if !requireMember(req, d, spaceID) {
+			return
+		}
+		m, err := d.Store.GetInSpace(req.Context(), spaceID, id)
+		if err != nil {
+			httpx.Error(req, 500, err.Error(), nil)
+			return
+		}
+		if m == nil {
+			httpx.Error(req, 404, "Machine not found.", nil)
+			return
+		}
+		if d.Docker == nil {
+			httpx.Error(req, 409, "Docker host is not configured.", nil)
+			return
+		}
+		if m.DockerID == "" {
+			httpx.Error(req, 409, "Machine has no container.", nil)
+			return
+		}
+		var in models.ExecMachineRequest
+		if err := httpx.BindJSON(req, &in); err != nil {
+			httpx.Error(req, 400, "Invalid body.", nil)
+			return
+		}
+		cmd := in.CmdParts()
+		if len(cmd) == 0 {
+			httpx.Error(req, 400, "cmd required.", nil)
+			return
+		}
+		out, err := d.Docker.Exec(req.Context(), m.DockerID, cmd)
+		if err != nil {
+			httpx.Error(req, 502, err.Error(), nil)
+			return
+		}
+		httpx.JSON(req, 200, out)
+	}), mini.Public("POST", "/api/spaces/{spaceId}/machines/{machineId}/exec", "runtime", "machine.exec")))
 }
