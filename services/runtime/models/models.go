@@ -1,5 +1,7 @@
 package models
 
+import "strings"
+
 const (
 	StatusRecorded = "recorded"
 	StatusRunning  = "running"
@@ -26,4 +28,35 @@ type CreateMachineRequest struct {
 	Name    string `json:"name"`
 	Image   string `json:"image"`
 	AgentID string `json:"agentId"`
+}
+
+// ExecMachineRequest is POST /exec body. cmd is a string or string array.
+type ExecMachineRequest struct {
+	Cmd any `json:"cmd"`
+}
+
+// CmdParts normalizes cmd into argv.
+func (r ExecMachineRequest) CmdParts() []string {
+	switch v := r.Cmd.(type) {
+	case string:
+		v = strings.TrimSpace(v)
+		if v == "" {
+			return nil
+		}
+		return strings.Fields(v)
+	case []any:
+		out := make([]string, 0, len(v))
+		for _, item := range v {
+			s, _ := item.(string)
+			s = strings.TrimSpace(s)
+			if s != "" {
+				out = append(out, s)
+			}
+		}
+		return out
+	case []string:
+		return v
+	default:
+		return nil
+	}
 }
