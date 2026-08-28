@@ -33,6 +33,11 @@ func Register(svc mini.Service, d *Deps) {
 }
 
 func registerPublic(svc mini.Service, d *Deps) {
+	registerAuth(svc, d)
+	registerMembers(svc, d)
+	registerTeams(svc, d)
+	registerKeys(svc, d)
+
 	must(svc.AddEndpoint("auth_login", mini.HandlerFunc(func(req mini.Request) {
 		var in models.LoginRequest
 		if err := httpx.BindJSON(req, &in); err != nil {
@@ -226,6 +231,39 @@ func registerInternal(d *Deps) {
 			return
 		}
 		respondJSON(msg, u.User)
+	})
+	_, _ = d.NC.Subscribe(subjects.InternalSpaceCan, func(msg *nats.Msg) {
+		var in models.CanRequest
+		if err := json.Unmarshal(msg.Data, &in); err != nil {
+			respondErr(d.NC, msg, "400", "bad request")
+			return
+		}
+		out := models.CanResponse{}
+		u, err := d.Store.GetUser(context.Background(), in.UserID)
+		if err != nil {
+			respondErr(d.NC, msg, "500", err.Error())
+			return
+		}
+		if u != nil && u.PlatformAdmin {
+			out.OK = true
+			out.Role = store.RoleOwner
+			respondJSON(msg, out)
+			return
+		}
+		m, err := d.Store.GetMember(context.Background(), in.SpaceID, in.UserID)
+		if err != nil {
+			respondErr(d.NC, msg, "500", err.Error())
+			return
+		}
+		if m == nil {
+			respondJSON(msg, out)
+			return
+		}
+		out.Role = m.Role
+		if in.Perm == "" || models.RoleHas(m.Role, in.Perm) {
+			out.OK = true
+		}
+		respondJSON(msg, out)
 	})
 }
 
