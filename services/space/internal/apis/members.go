@@ -57,6 +57,23 @@ func registerMembers(svc mini.Service, d *Deps) {
 		httpx.JSON(req, 201, m)
 	}), mini.Public("POST", "/api/spaces/{spaceId}/members", "space", "members.invite")))
 
+	must(svc.AddEndpoint("members_remove", mini.HandlerFunc(func(req mini.Request) {
+		spaceID := httpx.PathSpaceID(req)
+		userID := strings.TrimSpace(mini.PathParam(req, "userId"))
+		if spaceID == "" || userID == "" {
+			httpx.Error(req, 400, "spaceId and userId path required.", nil)
+			return
+		}
+		if !requirePerm(req, d, spaceID, models.PermMemberRole) {
+			return
+		}
+		if err := d.Store.RemoveMember(req.Context(), spaceID, userID); err != nil {
+			httpx.Error(req, 400, err.Error(), nil)
+			return
+		}
+		httpx.JSON(req, 200, map[string]any{"ok": true})
+	}), mini.Public("DELETE", "/api/spaces/{spaceId}/members/{userId}", "space", "members.remove")))
+
 	must(svc.AddEndpoint("members_update", mini.HandlerFunc(func(req mini.Request) {
 		spaceID := httpx.PathSpaceID(req)
 		userID := strings.TrimSpace(mini.PathParam(req, "userId"))

@@ -68,7 +68,7 @@ func ensureAssignee(ctx context.Context, d *Deps, spaceID, assigneeID string) er
 	return nil
 }
 
-func applyIssueExtras(ctx context.Context, d *Deps, spaceID, issueID, priority, dueAt, parentID string, extra []string) error {
+func applyIssueExtras(ctx context.Context, d *Deps, spaceID, issueID, priority, dueAt, parentID string, extra, labelIDs []string) error {
 	if err := d.Store.SetIssueFields(ctx, issueID, priority, dueAt, parentID); err != nil {
 		return err
 	}
@@ -77,7 +77,13 @@ func applyIssueExtras(ctx context.Context, d *Deps, spaceID, issueID, priority, 
 			return err
 		}
 	}
-	return d.Store.ReplaceAssignees(ctx, issueID, extra)
+	if err := d.Store.ReplaceAssignees(ctx, issueID, extra); err != nil {
+		return err
+	}
+	if labelIDs == nil {
+		return nil
+	}
+	return d.Store.SetIssueLabels(ctx, spaceID, issueID, labelIDs)
 }
 
 func publishIssue(d *Deps, subject, typ string, iss *models.Issue) {
