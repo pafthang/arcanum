@@ -47,7 +47,7 @@ func TestIssueCRUDAndComments(t *testing.T) {
 		t.Fatal("expected invalid status")
 	}
 
-	c, err := s.AddComment(ctx, iss.ID, "u1", "hello")
+	c, err := s.AddComment(ctx, iss.ID, "u1", "hello", "")
 	if err != nil || c.Body != "hello" {
 		t.Fatalf("comment: %v %#v", err, c)
 	}
