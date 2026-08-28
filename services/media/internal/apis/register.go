@@ -22,6 +22,7 @@ func Register(svc mini.Service, d *Deps) {
 		panic("media/apis.Register: nil Deps")
 	}
 	registerPublic(svc, d)
+	registerDelete(svc, d)
 	registerInternal(d)
 }
 
