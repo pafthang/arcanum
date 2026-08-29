@@ -4,7 +4,7 @@
 	import StatusBadge from '$lib/components/remnawave/StatusBadge.svelte';
 	import TrafficBar from '$lib/components/remnawave/TrafficBar.svelte';
 	import { chrome } from '$lib/components/remnawave/chrome';
-	import type { ConfigProfile, Node } from '@optimawave/ts-back';
+	import type { ConfigProfile, Node } from '@arcanum/ts-client';
 	import { nodeEndpoint, nodeProfile, nodeStatus } from './status';
 
 	const selectClass =

@@ -28,7 +28,7 @@
 	import { asArray } from '$lib/list';
 	import { rw } from '$lib/rw';
 	import { TableHandler, type TableHandlerInterface } from '@vincjo/datatables';
-	import type { ConfigInbound, InternalSquad } from '@optimawave/ts-back';
+	import type { ConfigInbound, InternalSquad } from '@arcanum/ts-client';
 
 	const list = rw.squads.internal.list();
 	const inboundsQ = rw.configProfiles.allInbounds();

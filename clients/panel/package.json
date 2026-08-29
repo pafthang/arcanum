@@ -1,10 +1,10 @@
 {
-  "name": "@optimawave/panel",
+  "name": "@arcanum/panel",
 	"private": true,
 	"version": "0.1.16",
 	"type": "module",
 	"scripts": {
-		"dev": "vite dev",
+		"arc:dev": "vite dev",
 		"build": "NODE_OPTIONS=--max-old-space-size=8192 vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
@@ -42,7 +42,7 @@
 	},
 	"dependencies": {
 		"@inlang/paraglide-js": "^2.24.1",
-		"@optimawave/ts-back": "workspace:*",
+		"@arcanum/ts-client": "workspace:*",
 		"@vincjo/datatables": "^2.8.1",
 		"echarts": "^6.1.0"
 	},

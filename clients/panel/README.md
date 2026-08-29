@@ -1,6 +1,6 @@
 # Remnawave web panel
 
-Svelte 5 + SvelteKit SPA for the Remnawave backend. Talks to the API through [`@optimawave/ts-back`](../svelte).
+Svelte 5 + SvelteKit SPA for the Remnawave backend. Talks to the API through [`@arcanum/ts-client`](../svelte).
 
 ## Develop
 

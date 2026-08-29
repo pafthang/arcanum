@@ -4,7 +4,7 @@
 	import JsonField from '$lib/components/remnawave/JsonField.svelte';
 	import { chrome } from '$lib/components/remnawave/chrome';
 	import { pretty } from '$lib/list';
-	import type { NodePlugin } from '@optimawave/ts-back';
+	import type { NodePlugin } from '@arcanum/ts-client';
 
 	let {
 		plugin = $bindable(null),

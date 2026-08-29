@@ -32,7 +32,7 @@
 	import { copyText } from '$lib/copy';
 	import { rw } from '$lib/rw';
 	import { TableHandler, type TableHandlerInterface } from '@vincjo/datatables';
-	import type { User } from '@optimawave/ts-back';
+	import type { User } from '@arcanum/ts-client';
 
 	let start = $state(0);
 	let size = $state(loadPageSize('users', 20));

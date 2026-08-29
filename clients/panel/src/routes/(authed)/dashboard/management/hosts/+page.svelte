@@ -30,7 +30,7 @@
 	import { asArray } from '$lib/list';
 	import { rw } from '$lib/rw';
 	import { TableHandler, type TableHandlerInterface } from '@vincjo/datatables';
-	import type { ConfigInbound, ConfigProfile, Host } from '@optimawave/ts-back';
+	import type { ConfigInbound, ConfigProfile, Host } from '@arcanum/ts-client';
 
 	const list = rw.hosts.list();
 	const profiles = rw.configProfiles.list();

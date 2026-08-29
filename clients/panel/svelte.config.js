@@ -13,7 +13,7 @@ const config = {
 			strict: true
 		}),
 		alias: {
-			'@optimawave/ts-back': '../ts-back/src/lib'
+			'@arcanum/ts-client': '../ts-back/src/lib'
 		}
 	}
 };

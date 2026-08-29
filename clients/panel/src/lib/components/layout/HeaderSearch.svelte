@@ -24,7 +24,7 @@
 	} from '$lib/features/layout/quick-open.svelte';
 	import { appToast } from '$lib/features/toast/toast';
 	import { rw } from '$lib/rw';
-	import type { User } from '@optimawave/ts-back';
+	import type { User } from '@arcanum/ts-client';
 
 	type TableSearch = { value: string; set: () => void };
 	type PaletteItem =

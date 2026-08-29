@@ -15,7 +15,7 @@
 	import { appToast } from '$lib/features/toast/toast';
 	import { asArray } from '$lib/list';
 	import { rw } from '$lib/rw';
-	import type { ApiToken } from '@optimawave/ts-back';
+	import type { ApiToken } from '@arcanum/ts-client';
 
 	const list = rw.tokens.list();
 	const createM = rw.tokens.create();

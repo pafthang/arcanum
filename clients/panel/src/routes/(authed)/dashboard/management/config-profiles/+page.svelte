@@ -29,7 +29,7 @@
 	import { asArray } from '$lib/list';
 	import { rw } from '$lib/rw';
 	import { TableHandler, type TableHandlerInterface } from '@vincjo/datatables';
-	import type { ConfigProfile } from '@optimawave/ts-back';
+	import type { ConfigProfile } from '@arcanum/ts-client';
 
 	const list = rw.configProfiles.list();
 	const createM = rw.configProfiles.create();

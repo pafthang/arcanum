@@ -24,7 +24,7 @@
 	import { appToast } from '$lib/features/toast/toast';
 	import { rw } from '$lib/rw';
 	import { TableHandler, type TableHandlerInterface } from '@vincjo/datatables';
-	import type { HwidDevice } from '@optimawave/ts-back';
+	import type { HwidDevice } from '@arcanum/ts-client';
 
 	type HwidRow = HwidDevice & { key: string };
 

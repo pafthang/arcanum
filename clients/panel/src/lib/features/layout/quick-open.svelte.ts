@@ -4,7 +4,7 @@ import { SETTINGS_NAV } from '$lib/features/settings/nav';
 import { shortcutsChord, shortcutsUi } from '$lib/features/layout/shortcuts.svelte';
 import { NAV } from '$lib/nav';
 import { rw } from '$lib/rw';
-import type { User, UserList } from '@optimawave/ts-back';
+import type { User, UserList } from '@arcanum/ts-client';
 
 export type QuickOpenPage = {
 	label: string;

@@ -28,7 +28,7 @@
 	import { asArray } from '$lib/list';
 	import { rw } from '$lib/rw';
 	import { TableHandler, type TableHandlerInterface } from '@vincjo/datatables';
-	import type { ExternalSquad } from '@optimawave/ts-back';
+	import type { ExternalSquad } from '@arcanum/ts-client';
 
 	const list = rw.squads.external.list();
 	const createM = rw.squads.external.create();

@@ -4,7 +4,7 @@
 	import { chrome } from '$lib/components/remnawave/chrome';
 	import { pretty } from '$lib/list';
 	import { errorMessage, parseSnippetArray } from '$lib/json-edit';
-	import type { Snippet } from '@optimawave/ts-back';
+	import type { Snippet } from '@arcanum/ts-client';
 
 	let {
 		snippet = $bindable(null),

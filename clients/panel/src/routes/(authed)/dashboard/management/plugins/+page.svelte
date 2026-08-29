@@ -29,7 +29,7 @@
 	import { asArray } from '$lib/list';
 	import { rw } from '$lib/rw';
 	import { TableHandler, type TableHandlerInterface } from '@vincjo/datatables';
-	import type { NodePlugin } from '@optimawave/ts-back';
+	import type { NodePlugin } from '@arcanum/ts-client';
 
 	const list = rw.plugins.list();
 	const createM = rw.plugins.create();

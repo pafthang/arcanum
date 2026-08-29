@@ -15,7 +15,7 @@
 		trafficToBytes,
 		type TrafficUnit
 	} from '$lib/format';
-	import type { User } from '@optimawave/ts-back';
+	import type { User } from '@arcanum/ts-client';
 
 	let {
 		user = $bindable(null),

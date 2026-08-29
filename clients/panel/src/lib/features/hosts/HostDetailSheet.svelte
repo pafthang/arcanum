@@ -3,7 +3,7 @@
 	import DetailSheet from '$lib/components/remnawave/DetailSheet.svelte';
 	import StatusBadge from '$lib/components/remnawave/StatusBadge.svelte';
 	import { chrome } from '$lib/components/remnawave/chrome';
-	import type { ConfigInbound, Host } from '@optimawave/ts-back';
+	import type { ConfigInbound, Host } from '@arcanum/ts-client';
 
 	const selectClass =
 		'h-8 w-full rounded-md border border-[var(--app-border)] bg-[var(--color-bg)] px-2 text-sm text-[var(--color-text-primary)]';

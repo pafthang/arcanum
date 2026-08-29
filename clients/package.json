@@ -2,12 +2,12 @@
 	"name": "clients",
 	"private": true,
 	"packageManager": "bun@1.3.11",
-	"workspaces": ["panel",  "ts-back"],
+	"workspaces": ["./panel",  "./ts-back"],
 	"scripts": {
-		"dev": "bun run --filter @optimawave/panel dev",
+		"dev": "bun run --filter @arcanum/panel dev",
 		"dev:tg-app": "bun run --filter @optimawave/tg-app dev",
-		"build": "bun run --filter @optimawave/ts-back build && bun run --filter @optimawave/ts-bot build && bun run --filter @optimawave/panel build && bun run --filter @optimawave/tg-app build",
+		"build": "bun run --filter @arcanum/ts-client build && bun run --filter @optimawave/ts-bot build && bun run --filter @arcanum/panel build && bun run --filter @optimawave/tg-app build",
 		"check": "bun run --filter '*' check",
-		"test": "bun run --filter @optimawave/ts-back test && bun run --filter @optimawave/ts-bot test && bun run --filter @optimawave/panel test:unit && bun run --filter @optimawave/tg-app test:unit"
+		"test": "bun run --filter @arcanum/ts-client test && bun run --filter @optimawave/ts-bot test && bun run --filter @arcanum/panel test:unit && bun run --filter @optimawave/tg-app test:unit"
 	}
 }

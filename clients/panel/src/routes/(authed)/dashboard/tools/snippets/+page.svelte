@@ -28,7 +28,7 @@
 	import { asArray } from '$lib/list';
 	import { rw } from '$lib/rw';
 	import { TableHandler, type TableHandlerInterface } from '@vincjo/datatables';
-	import type { Snippet } from '@optimawave/ts-back';
+	import type { Snippet } from '@arcanum/ts-client';
 
 	const list = rw.snippets.list();
 	const createM = rw.snippets.create();

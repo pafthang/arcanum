@@ -5,7 +5,7 @@
 	import { chrome } from '$lib/components/remnawave/chrome';
 	import { pretty } from '$lib/list';
 	import { errorMessage, parseJsonObject, profileHasInbound } from '$lib/json-edit';
-	import type { ConfigProfile } from '@optimawave/ts-back';
+	import type { ConfigProfile } from '@arcanum/ts-client';
 
 	let {
 		profile = $bindable(null),

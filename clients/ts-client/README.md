@@ -1,10 +1,10 @@
-# `@optimawave/ts-back`
+# `@arcanum/ts-client`
 
 Svelte 5 (runes) client for the Go Remnawave API. This is not the panel UI.
 
 ```svelte
 <script>
-  import { createRemnawave, session } from '@optimawave/ts-back';
+  import { createRemnawave, session } from '@arcanum/ts-client';
 
   session.init();
   const api = createRemnawave({ baseUrl: '' }); // same-origin /api via proxy
