@@ -1,110 +1,65 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
-	import { Shuffle, UserPlus } from 'lucide-svelte';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Password } from '$lib/components/ui/password';
-	import AuthShell from '$lib/components/auth/AuthShell.svelte';
-	import BootScreen from '$lib/components/auth/BootScreen.svelte';
-	import { generatePassword, PASSWORD_POLICY, passwordLooksValid } from '$lib/components/auth/password';
-	import { appToast } from '$lib/features/toast/toast';
-	import { APP_NAME } from '$lib/brand';
-	import { rw, session } from '$lib/rw';
+  import { client } from '@arcanum/ts-client';
+  import { Button } from '$lib/components/ui/button';
+  import { Input } from '$lib/components/ui/input';
+  import { Password } from '$lib/components/ui/password';
+  import AuthShell from '$lib/components/auth/AuthShell.svelte';
 
-	const statusQ = rw.auth.status();
-	const registerM = rw.auth.register();
+  let email = $state('');
+  let password = $state('');
+  let confirm = $state('');
+  let loading = $state(false);
+  let error = $state('');
 
-	let username = $state('');
-	let password = $state('');
-	let confirm = $state('');
+  const register = async () => {
+    loading = true;
+    error = '';
 
-	const status = $derived(statusQ.data);
-	const registerAllowed = $derived(status?.isRegisterAllowed ?? false);
-	const title = $derived(status?.branding?.title || APP_NAME);
-	const mismatch = $derived(confirm.length > 0 && confirm !== password);
-	const canSubmit = $derived(username.length > 0 && passwordLooksValid(password) && password === confirm);
+    if (password !== confirm) {
+      error = 'Пароли не совпадают';
+      loading = false;
+      return;
+    }
 
-	onMount(() => {
-		session.init();
-		if (session.isAuthenticated) void goto('/dashboard/home', { replaceState: true });
-	});
+    try {
+      const res = await client.post('/auth/register', { email, password });
+      const { token } = res.data;
 
-	$effect(() => {
-		if (status && !registerAllowed) void goto('/auth/login', { replaceState: true });
-	});
+      localStorage.setItem('arcanum_token', token);
+      client.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
-	async function submit(e: Event) {
-		e.preventDefault();
-		if (!canSubmit) return;
-		try {
-			await registerM.mutate({ username, password });
-			void goto('/dashboard/home', { replaceState: true });
-		} catch (err) {
-			appToast.apiError(err, 'Registration failed');
-		}
-	}
-
-	async function generate() {
-		const next = generatePassword();
-		password = next;
-		confirm = next;
-		try {
-			await navigator.clipboard.writeText(next);
-			appToast.success('Password generated and copied');
-		} catch {
-			appToast.success('Password generated');
-		}
-	}
+      window.location.href = '/panel';
+    } catch (e: any) {
+      error = e.response?.data?.message || 'Ошибка регистрации';
+    } finally {
+      loading = false;
+    }
+  };
 </script>
 
-{#if (statusQ.loading && !status) || (status && !registerAllowed)}
-	<BootScreen message={status && !registerAllowed ? 'Redirecting…' : 'Checking authentication…'} />
-{:else}
-	<AuthShell {title} subtitle="Create the first administrator">
-		{#if statusQ.error}
-			<div
-				class="rounded-lg border border-[var(--color-error)]/30 bg-[var(--color-error)]/10 px-3 py-2 text-center text-sm text-[var(--color-error)]"
-			>
-				Server is not responding. Check logs.
-			</div>
-		{:else}
-			<p class="mb-5 text-center text-sm text-[var(--color-text-secondary)]">
-				This panel has no admin yet. Set a username and a strong password to finish setup.
-			</p>
-			<form class="space-y-3.5" onsubmit={submit}>
-				<div>
-					<label class="text-[11px] font-medium text-[var(--color-text-tertiary)]" for="username">Username</label>
-					<Input
-						id="username"
-						bind:value={username}
-						required
-						autocomplete="username"
-						placeholder="IamSuperAdmin"
-						class="mt-1"
-					/>
-				</div>
-				<div>
-					<label class="text-[11px] font-medium text-[var(--color-text-tertiary)]" for="password">Password</label>
-					<Password id="password" bind:value={password} required autocomplete="new-password" class="mt-1" />
-					<p class="mt-1 text-[11px] text-[var(--color-text-tertiary)]">{PASSWORD_POLICY}</p>
-				</div>
-				<div>
-					<label class="text-[11px] font-medium text-[var(--color-text-tertiary)]" for="confirm">Confirm password</label>
-					<Password id="confirm" bind:value={confirm} required autocomplete="new-password" class="mt-1" />
-					{#if mismatch}
-						<p class="mt-1 text-[11px] text-[var(--color-error)]">Passwords do not match.</p>
-					{/if}
-				</div>
-				<Button class="w-full" type="button" variant="outline" onclick={generate}>
-					<Shuffle class="size-4" />
-					Generate password
-				</Button>
-				<Button class="w-full" type="submit" disabled={registerM.pending || !canSubmit}>
-					<UserPlus class="size-4" />
-					{registerM.pending ? 'Creating account…' : 'Create admin'}
-				</Button>
-			</form>
-		{/if}
-	</AuthShell>
-{/if}
+<AuthShell title="Arcanum" subtitle="Создать первого администратора">
+  <form on:submit|preventDefault={register} class="space-y-4">
+    <div>
+      <label class="text-sm font-medium">Email</label>
+      <Input bind:value={email} placeholder="admin@example.com" required />
+    </div>
+
+    <div>
+      <label class="text-sm font-medium">Пароль</label>
+      <Password bind:value={password} placeholder="Мощный пароль" required />
+    </div>
+
+    <div>
+      <label class="text-sm font-medium">Подтверждение</label>
+      <Password bind:value={confirm} placeholder="Повторите пароль" required />
+    </div>
+
+    <Button type="submit" class="w-full" disabled={loading}>
+      {loading ? 'Создание...' : 'Создать администратора'}
+    </Button>
+
+    {#if error}
+      <p class="text-red-500 text-sm mt-2">{error}</p>
+    {/if}
+  </form>
+</AuthShell>

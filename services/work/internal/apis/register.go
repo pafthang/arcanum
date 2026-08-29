@@ -28,5 +28,6 @@ func Register(svc mini.Service, d *Deps) {
 	registerIssues(svc, d)
 	registerComments(svc, d)
 	registerLabels(svc, d)
+	registerPM(svc, d)
 	registerInternal(d)
 }

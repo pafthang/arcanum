@@ -36,6 +36,15 @@ func registerHooks(svc mini.Service, d *Deps) {
 		mini.WithPublicAuth(mini.AuthNone),
 	))
 
+	must(svc.AddEndpoint("hook_telegram", mini.HandlerFunc(func(req mini.Request) {
+		id := strings.TrimSpace(mini.PathParam(req, "connectorId"))
+		handleIngest(req, d, id, false)
+	}),
+		mini.WithPublicHTTP("POST", "/api/integ/hooks/telegram/{connectorId}"),
+		mini.WithPublicSubject("integ", "hook.telegram"),
+		mini.WithPublicAuth(mini.AuthNone),
+	))
+
 	if d.NC == nil {
 		return
 	}

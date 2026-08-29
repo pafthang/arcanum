@@ -1,0 +1,32 @@
+{
+  "name": "@arcanum/client",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "svelte": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "svelte": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "svelte-package -i src/lib",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "test": "tsx --test src/url.test.ts src/error.test.ts src/coverage.test.ts src/query-cache.test.ts"
+  },
+  "peerDependencies": {
+    "svelte": "^5.56.10"
+  },
+  "devDependencies": {
+    "@sveltejs/package": "^2.5.8",
+    "@sveltejs/vite-plugin-svelte": "^7.3.0",
+    "svelte": "^5.56.10",
+    "svelte-check": "^4.7.6",
+    "tsx": "^4.23.12",
+    "typescript": "~5.9.3"
+  }
+}

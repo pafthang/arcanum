@@ -74,3 +74,18 @@ type CreateMessageInternal struct {
 	Source      string `json:"source"`
 	ExternalRef string `json:"externalRef"`
 }
+
+// Reaction represents an emoji reaction on a message.
+type Reaction struct {
+	ID        string `json:"id"`
+	MessageID string `json:"messageId"`
+	SpaceID   string `json:"spaceId"`
+	ActorID   string `json:"actorId"`
+	Emoji     string `json:"emoji"`
+	CreatedAt string `json:"createdAt"`
+}
+
+// AddReactionRequest is POST .../messages/{messageId}/reactions body.
+type AddReactionRequest struct {
+	Emoji string `json:"emoji"`
+}

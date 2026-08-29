@@ -39,6 +39,18 @@ func OpenStore(dataDir string) (*Store, error) {
 		_ = db.Close()
 		return nil, err
 	}
+	if err := migrateCycles(db); err != nil {
+		_ = db.Close()
+		return nil, err
+	}
+	if err := migrateProjects(db); err != nil {
+		_ = db.Close()
+		return nil, err
+	}
+	if err := migrateViews(db); err != nil {
+		_ = db.Close()
+		return nil, err
+	}
 	return &Store{db: db}, nil
 }
 

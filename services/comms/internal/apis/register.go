@@ -26,6 +26,7 @@ func Register(svc mini.Service, d *Deps) {
 	}
 	registerChannels(svc, d)
 	registerMessages(svc, d)
+	registerReactions(svc, d)
 	registerWS(svc)
 	registerInternal(d)
 }

@@ -5,6 +5,7 @@ import (
 
 	"github.com/pafthang/arcanum/pkg/httpx"
 	"github.com/pafthang/arcanum/pkg/mini"
+	"github.com/pafthang/arcanum/services/runtime/internal/gateway"
 	"github.com/pafthang/arcanum/services/runtime/models"
 )
 
@@ -164,4 +165,41 @@ func registerPublic(svc mini.Service, d *Deps) {
 		}
 		httpx.JSON(req, 200, out)
 	}), mini.Public("POST", "/api/spaces/{spaceId}/machines/{machineId}/exec", "runtime", "machine.exec")))
+
+	must(svc.AddEndpoint("machines_proxy", mini.HandlerFunc(func(req mini.Request) {
+		spaceID := httpx.PathSpaceID(req)
+		id := strings.TrimSpace(mini.PathParam(req, "machineId"))
+		port := strings.TrimSpace(mini.PathParam(req, "port"))
+		if spaceID == "" || id == "" || port == "" {
+			httpx.Error(req, 400, "spaceId, machineId and port required.", nil)
+			return
+		}
+		if !requireMember(req, d, spaceID) {
+			return
+		}
+		m, err := d.Store.GetInSpace(req.Context(), spaceID, id)
+		if err != nil {
+			httpx.Error(req, 500, err.Error(), nil)
+			return
+		}
+		if m == nil {
+			httpx.Error(req, 404, "Machine not found.", nil)
+			return
+		}
+		if m.Status != models.StatusRunning {
+			httpx.Error(req, 409, "Machine is not running.", nil)
+			return
+		}
+		gw, err := gateway.New("127.0.0.1", port)
+		if err != nil {
+			httpx.Error(req, 400, err.Error(), nil)
+			return
+		}
+		httpx.JSON(req, 200, map[string]any{
+			"status":    "proxy_ready",
+			"machineId": m.ID,
+			"port":      port,
+			"target":    gw.TargetHost + ":" + gw.Port,
+		})
+	}), mini.Public("GET", "/api/spaces/{spaceId}/machines/{machineId}/proxy/{port}", "runtime", "machine.proxy")))
 }

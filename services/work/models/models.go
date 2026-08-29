@@ -105,3 +105,67 @@ type Overview struct {
 	Unassigned int            `json:"unassigned"`
 	Comments   int            `json:"comments"`
 }
+
+// Cycle represents a sprint / cycle in a space.
+type Cycle struct {
+	ID          string `json:"id"`
+	SpaceID     string `json:"spaceId"`
+	Name        string `json:"name"`
+	Description string `json:"description,omitempty"`
+	Status      string `json:"status"`
+	StartDate   string `json:"startDate,omitempty"`
+	EndDate     string `json:"endDate,omitempty"`
+	CreatedAt   string `json:"createdAt"`
+	UpdatedAt   string `json:"updatedAt"`
+}
+
+// CreateCycleRequest is POST .../work/cycles body.
+type CreateCycleRequest struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Status      string `json:"status"`
+	StartDate   string `json:"startDate"`
+	EndDate     string `json:"endDate"`
+}
+
+// Project represents a project in a space.
+type Project struct {
+	ID          string `json:"id"`
+	SpaceID     string `json:"spaceId"`
+	Name        string `json:"name"`
+	Key         string `json:"key,omitempty"`
+	Description string `json:"description,omitempty"`
+	Status      string `json:"status"`
+	LeadID      string `json:"leadId,omitempty"`
+	CreatedAt   string `json:"createdAt"`
+	UpdatedAt   string `json:"updatedAt"`
+}
+
+// CreateProjectRequest is POST .../work/projects body.
+type CreateProjectRequest struct {
+	Name        string `json:"name"`
+	Key         string `json:"key"`
+	Description string `json:"description"`
+	Status      string `json:"status"`
+	LeadID      string `json:"leadId"`
+}
+
+// View represents a saved view filter in a space.
+type View struct {
+	ID          string `json:"id"`
+	SpaceID     string `json:"spaceId"`
+	Name        string `json:"name"`
+	Description string `json:"description,omitempty"`
+	Query       string `json:"query,omitempty"`
+	Icon        string `json:"icon,omitempty"`
+	CreatedBy   string `json:"createdBy,omitempty"`
+	CreatedAt   string `json:"createdAt"`
+}
+
+// CreateViewRequest is POST .../work/views body.
+type CreateViewRequest struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Query       string `json:"query"`
+	Icon        string `json:"icon"`
+}
